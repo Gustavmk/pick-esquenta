@@ -1,0 +1,11 @@
+dashboard:
+  # dashboard.basePath -- Path on which the dashboard is served. Defaults to `/`
+  basePath: null
+  enabled: true
+  ingress:
+    enabled: true
+    hosts:
+      - host: goldilocks.kubernetes.docker.internal
+        paths:
+          - path: /
+            type: ImplementationSpecific

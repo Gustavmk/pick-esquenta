@@ -14,6 +14,11 @@ METRICS_SERVER_CHART_VALUES := configs/helm/metrics-server/values.yml
 METRICS_SERVER_CHART_LOCAL_VALUES := configs/helm/metrics-server/values-kind.yml
 METRICS_SERVER_CHART_EKS_VALUES := configs/helm/metrics-server/values-eks.yml
 
+GOLDILOCKS_NAMESPACE := goldilocks
+GOLDILOCKS_RELEASE := goldilocks
+GOLDILOCKS_CHART_VALUES := configs/helm/goldilocks/values.yml
+GOLDILOCKS_LOCAL_VALUES := configs/helm/goldilocks/values-local.yml
+
 INGRESS_RELEASE := ingress-nginx
 INGRESS_NAMESPACE := ingress-nginx
 INGRESS_CHART_VALUES_EKS := configs/helm/ingress-nginx-controller/values.yaml
@@ -114,6 +119,25 @@ delete-metrics-server:					# Remove a instalação do Metrics Server no EKS
 	helm uninstall ${METRICS_SERVER_RELEASE} -n ${METRICS_SERVER_NAMESPACE}
 	kubectl delete ns ${METRICS_SERVER_NAMESPACE}
 
+##------------------------------------------------------------------------
+##                    Comandos do Goldilocks
+##------------------------------------------------------------------------
+# https://github.com/FairwindsOps/charts/tree/master/stable/goldilocks
+deploy-goldilocks-local:					# Realiza a instalação do Metrics Server no Kind
+		helm repo add fairwinds-stable https://charts.fairwinds.com/stable
+		helm upgrade -i ${GOLDILOCKS_RELEASE} -n ${GOLDILOCKS_NAMESPACE} fairwinds-stable/goldilocks \
+		--values ${GOLDILOCKS_CHART_VALUES} \
+		--values ${GOLDILOCKS_LOCAL_VALUES} \
+		--wait \
+		--atomic \
+		--debug \
+		--timeout 3m \
+		--create-namespace
+
+
+delete-goldilocks:					# Remove a instalação do Metrics Server no EKS
+	helm uninstall ${GOLDILOCKS_RELEASE} -n ${GOLDILOCKS_NAMESPACE}
+	kubectl delete ns ${GOLDILOCKS_NAMESPACE}
 ##------------------------------------------------------------------------
 ##                    Comandos do Redis
 ##------------------------------------------------------------------------
