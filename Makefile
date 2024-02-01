@@ -35,7 +35,7 @@ KUBE_PROMETHEUS_STACK_CHART_VALUES := configs/helm/kube-prometheus-stack/values.
 KUBE_PROMETHEUS_STACK_CHART_LOCAL_VALUES := configs/helm/kube-prometheus-stack/values-kind.yml
 KUBE_PROMETHEUS_STACK_CHART_EKS_VALUES := configs/helm/kube-prometheus-stack/values-eks.yml
 
-GIROPOPS_SENHAS_ROOT := giropops-senhas
+GIROPOPS_SENHAS_ROOT := apps/giropops-senhas
 GIROPOPS_SENHAS_BASE := ${GIROPOPS_SENHAS_ROOT}/manifests/base
 GIROPOPS_SENHAS_LOCAL := ${GIROPOPS_SENHAS_ROOT}/manifests/overlays/kind
 GIROPOPS_SENHAS_EKS := ${GIROPOPS_SENHAS_ROOT}/manifests/overlays/eks
@@ -148,7 +148,7 @@ deploy-redis-local:						# Realiza a instalação do Redis localmente
 		--wait \
 		--atomic \
 		--debug \
-		--timeout 3m \
+		--timeout 6m \
 		--create-namespace
 
 deploy-redis-eks:						# Realiza a instalação do Redis no EKS

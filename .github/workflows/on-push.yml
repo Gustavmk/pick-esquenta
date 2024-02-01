@@ -33,7 +33,7 @@ jobs:
       - name: Scan dockerfile com Hadolint
         uses: hadolint/hadolint-action@v3.1.0
         with:
-          dockerfile: giropops-senhas/Dockerfile
+          dockerfile: apps/giropops-senhas/Dockerfile
           config: configs/hadolint/hadolint-config.yaml
 
   lint-kubernetes-manifests:
@@ -47,12 +47,12 @@ jobs:
       
       - name: Gerando os manifests para lint
         run: |
-          kustomize build giropops-senhas/manifests/overlays/eks >> ./giropops-senhas/manifests/rendered-manifests.yaml
+          kustomize build apps/giropops-senhas/manifests/overlays/eks >> ./apps/giropops-senhas/manifests/rendered-manifests.yaml
 
       - name: Scan yaml files com kube-linter
         uses: stackrox/kube-linter-action@v1.0.4
         with:
-          directory: ./giropops-senhas/manifests/rendered-manifests.yaml
+          directory: ./apps/giropops-senhas/manifests/rendered-manifests.yaml
           config: configs/kubelinter/kubelinter-config.yaml
           format: sarif
           output-file: kube-linter.sarif
