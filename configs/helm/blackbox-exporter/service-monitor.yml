@@ -13,12 +13,16 @@ spec:
     - sourceLabels: [__address__]
       targetLabel: __param_target
     - targetLabel: __address__
-      replacement:  black-prometheus-blackbox-exporter:9115 # is the name:port of the blackbox exporter service
+      replacement:  blackbox-prometheus-blackbox-exporter.blackbox.svc.cluster.local:9115 # is the name:port of the blackbox exporter service
     - sourceLabels: [__param_target]
       targetLabel: instance
     - action: labelmap
       regex: __meta_kubernetes_service_label_(.+) # specify to monitor kubernets services
   jobLabel: blackbox-exporter
+  namespaceSelector:
+    matchNames:
+    - default
+    - dev
   selector:
     matchLabels:
       app.kubernetes.io/component: blackbox # monitor the services only with this label

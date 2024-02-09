@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blackbox-exporter-envvars
+  namespace: blackbox
+data:
+  HOST: blackbox-prometheus-blackbox-exporter.blackbox.svc.cluster.local:9115
