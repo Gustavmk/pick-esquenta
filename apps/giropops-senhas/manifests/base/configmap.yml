@@ -4,4 +4,4 @@ metadata:
   name: giropops-senhas-envvars
   namespace: giropops-senhas
 data:
-  REDIS_HOST: bitnami-redis-master-0.bitnami-redis-headless.bitnami-redis.svc.cluster.local
+  REDIS_HOST: redis-master-0.redis-headless.redis.svc.cluster.local
