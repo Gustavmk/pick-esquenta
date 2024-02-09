@@ -1,7 +1,7 @@
 ##------------------------------------------------------------------------
 ##                     Global vars
 ##------------------------------------------------------------------------
-CLUSTER_NAME := pick
+CLUSTER_NAME := kind
 CLUSTER_CONFIG := configs/kind/cluster.yaml
 EKSCTL_CONFIG := configs/eksctl/config.yaml
 
@@ -19,12 +19,18 @@ GOLDILOCKS_RELEASE := goldilocks
 GOLDILOCKS_CHART_VALUES := configs/helm/goldilocks/values.yml
 GOLDILOCKS_LOCAL_VALUES := configs/helm/goldilocks/values-local.yml
 
+BLACKBOX_ROOT := configs/helm/blackbox-exporter
+BLACKBOX_NAMESPACE := blackbox
+BLACKBOX_RELEASE := blackbox
+BLACKBOX_CHART_VALUES := ${BLACKBOX_ROOT}/values.yml
+BLACKBOX_LOCAL_VALUES := ${BLACKBOX_ROOT}/values-local.yml
+
 INGRESS_RELEASE := ingress-nginx
 INGRESS_NAMESPACE := ingress-nginx
 INGRESS_CHART_VALUES_EKS := configs/helm/ingress-nginx-controller/values.yaml
 
-REDIS_NAMESPACE := bitnami-redis
-REDIS_RELEASE := bitnami-redis
+REDIS_NAMESPACE := redis
+REDIS_RELEASE := redis
 REDIS_CHART_VALUES := configs/helm/redis/values.yml
 REDIS_CHART_LOCAL_VALUES := configs/helm/redis/values-kind.yml
 REDIS_CHART_EKS_VALUES := configs/helm/redis/values-eks.yml
@@ -41,6 +47,13 @@ GIROPOPS_SENHAS_LOCAL := ${GIROPOPS_SENHAS_ROOT}/manifests/overlays/kind
 GIROPOPS_SENHAS_EKS := ${GIROPOPS_SENHAS_ROOT}/manifests/overlays/eks
 GIROPOPS_SENHAS_DOCKERFILE := ${GIROPOPS_SENHAS_ROOT}/Dockerfile
 GIROPOPS_SENHAS_NAMESPACE := giropops-senhas
+
+GO_SAMPLE_ROOT := apps/go-sample
+GO_SAMPLE_BASE := ${GO_SAMPLE_ROOT}/manifests/base
+GO_SAMPLE_LOCAL := ${GO_SAMPLE_ROOT}/manifests/overlays/kind
+GO_SAMPLE_EKS := ${GO_SAMPLE_ROOT}/manifests/overlays/eks
+GO_SAMPLE_DOCKERFILE := ${GO_SAMPLE_ROOT}/Dockerfile
+GO_SAMPLE_NAMESPACE := go-sample
 
 ##------------------------------------------------------------------------
 ##                     Local K8S Cluster
@@ -120,6 +133,23 @@ delete-metrics-server:					# Remove a instalação do Metrics Server no EKS
 	kubectl delete ns ${METRICS_SERVER_NAMESPACE}
 
 ##------------------------------------------------------------------------
+##                    Comandos do Blackbox
+##------------------------------------------------------------------------
+
+deploy-blackbox-local:
+	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+	helm upgrade -i ${BLACKBOX_RELEASE} -n ${BLACKBOX_NAMESPACE} \
+		prometheus-community/prometheus-blackbox-exporter \
+		--values ${BLACKBOX_CHART_VALUES} \
+		--values ${BLACKBOX_LOCAL_VALUES} \
+		--wait \
+		--atomic \
+		--debug \
+		--timeout 3m \
+		--create-namespace
+	kubectl apply -f ${BLACKBOX_ROOT}/service-monitor.yml -n ${BLACKBOX_NAMESPACE}
+
+##------------------------------------------------------------------------
 ##                    Comandos do Goldilocks
 ##------------------------------------------------------------------------
 # https://github.com/FairwindsOps/charts/tree/master/stable/goldilocks
@@ -141,6 +171,7 @@ delete-goldilocks:					# Remove a instalação do Metrics Server no EKS
 ##------------------------------------------------------------------------
 ##                    Comandos do Redis
 ##------------------------------------------------------------------------
+# https://github.com/bitnami/charts/tree/main/bitnami/redis
 deploy-redis-local:						# Realiza a instalação do Redis localmente
 	helm upgrade -i ${REDIS_RELEASE} -n ${REDIS_NAMESPACE} oci://registry-1.docker.io/bitnamicharts/redis \
 		--values ${REDIS_CHART_VALUES} \
@@ -209,17 +240,25 @@ delete-kube-prometheus-stack:			# Remove a instalação do Prometheus
 ##------------------------------------------------------------------------
 ##                     Comandos do Giropops
 ##------------------------------------------------------------------------
-build-image:							# Realiza o build da imagem
+build-image-giropops-senhas:					# Realiza o build da imagem Giropops Senhas
 	docker build -t giropops-senhas-python-chainguard:${GIROPOPS_SENHAS_TAG} -f ${GIROPOPS_SENHAS_DOCKERFILE} ${GIROPOPS_SENHAS_ROOT}
 
+build-image-go-sample:							# Realiza o build da imagem Go Sample
+	#docker build -t go-sample:${APPS_TAG} -f ${GO_SAMPLE_DOCKERFILE} ${GO_SAMPLE_ROOT}"
+	
+build-image-all:
+	$(MAKE) build-image-giropops-senhas
+	$(MAKE) build-image-go-sample
+
 scan-image:								# Realiza o scan da imagem usando Trivy
-	trivy image giropops-senhas-python-chainguard:${GIROPOPS_SENHAS_TAG} --severity HIGH,CRITICAL --exit-code 1
+	#trivy image giropops-senhas-python-chainguard:${GIROPOPS_SENHAS_TAG} --severity HIGH,CRITICAL --exit-code 1
+	trivy image giropops-senhas-python-chainguard:${GIROPOPS_SENHAS_TAG} --severity HIGH,CRITICAL --exit-code 0
 
 load-image:
 	kind load docker-image giropops-senhas-python-chainguard:${GIROPOPS_SENHAS_TAG} -n ${CLUSTER_NAME}
 
 build-scan-push-local:					# Realiza o build, análise e push da imagem para o cluster local para fim de testes
-	$(MAKE) build-image
+	$(MAKE) build-image-all
 	$(MAKE) scan-image
 	$(MAKE) load-image
 

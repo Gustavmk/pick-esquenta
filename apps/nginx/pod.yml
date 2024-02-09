@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx1
+  labels:
+    app: nginx1
+    app.kubernetes.io/component: blackbox
+spec:
+  containers:
+    - name: nginx1
+      image: nginx
+      ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx1
+  labels:
+    name: nginx1
+    app.kubernetes.io/component: blackbox
+spec:
+  ports:
+    - port: 80
+  selector:
+    app: nginx1
+  type: LoadBalancer

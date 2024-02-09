@@ -1,0 +1,7 @@
+config:
+  modules:
+    tcp_prober:
+      prober: tcp
+      tcp:
+        ip_protocol_fallback: false
+        preferred_ip_protocol: ip4
