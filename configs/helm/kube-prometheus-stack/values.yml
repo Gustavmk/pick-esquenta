@@ -41,6 +41,10 @@ grafana:
     default:
       k6-results:
         url: https://raw.githubusercontent.com/StuxxNet/pick-esquenta/main/configs/helm/kube-prometheus-stack/dashboards/k6_results.json
+      nignx-ingress-controller:
+        url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/grafana/dashboards/nginx.json
+      nginx-ingress-handling-performance:
+        url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/grafana/dashboards/request-handling-performance.json
 
 kubeControllerManager:
   enabled: false
@@ -135,6 +139,9 @@ prometheus:
     podMonitorSelectorNilUsesHelmValues: false
     probeSelectorNilUsesHelmValues: false
     scrapeConfigSelectorNilUsesHelmValues: false
+    serviceMonitorNamespaceSelector: {} # get service monitors on all namespaces
+    ruleNamespaceSelector: {}
+    serviceMonitorSelector: {} # get all existing service monitors
     retention: 30d
     retentionSize: "8GB"
     resources:
