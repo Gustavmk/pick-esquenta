@@ -4,7 +4,7 @@ metadata:
   name: blackbox-exporter
 spec:
   endpoints:
-  - interval: 1m
+  - interval: 15s
     path: /probe
     scrapeTimeout: 10s
     params:

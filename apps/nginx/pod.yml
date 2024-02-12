@@ -11,6 +11,8 @@ spec:
       image: nginx
       ports:
         - containerPort: 80
+      command: ["echo"]
+      args: ["teste"]
 ---
 apiVersion: v1
 kind: Service
