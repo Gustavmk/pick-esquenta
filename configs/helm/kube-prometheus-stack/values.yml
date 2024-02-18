@@ -9,11 +9,7 @@ alertmanager:
   ingress:
     enabled: false
   alertmanagerSpec:
-    image:
-      registry: cgr.dev
-      repository: chainguard/prometheus-alertmanager
-      tag: ""
-      sha: "09594d189f6a21ab2b293ad6761f2c8003d67d1fca463c83b592715f64ee3f48"
+    replicas: 2
     resources:
       requests:
         memory: 400Mi
@@ -63,9 +59,6 @@ kubeStateMetrics:
 
 kube-state-metrics:
   image:
-    registry: cgr.dev
-    repository: chainguard/kube-state-metrics
-    sha: "sha256:3e29688126c13479b90d590f61de01378bd37eec83342aaf3066185e47819758"
     pullPolicy: IfNotPresent
   resources: 
     limits:
@@ -81,10 +74,7 @@ nodeExporter:
 
 prometheus-node-exporter:
   image:
-    registry: cgr.dev
-    repository: chainguard/prometheus-node-exporter
     pullPolicy: IfNotPresent
-    digest: "sha256:09f68e470dd249b87600023adac65e9b466543b1bb9e32ecdfb6ecded378b4d9"
   resources:
     limits:
      memory: 64Mi
@@ -101,15 +91,8 @@ prometheusOperator:
       cpu: 100m
       memory: 100Mi
   image:
-    registry: cgr.dev
-    repository: chainguard/prometheus-operator
-    sha: "2bbdce268f8146d50bf3d9e6bf44bd0cf9b154105d8b2df08227a962f41882fa"
     pullPolicy: IfNotPresent
   prometheusConfigReloader:
-    image:
-      registry: cgr.dev
-      repository: chainguard/prometheus-config-reloader
-      sha: "c128598b3a0fd5b7c2b8de6079eb051ce9c290e0d05c1a7a6fc49007a180dc9f"
     enableProbe: true
     resources:
       requests:
@@ -128,10 +111,6 @@ prometheus:
   ingress:
     enabled: false
   prometheusSpec:
-    image:
-      registry: cgr.dev
-      repository: chainguard/prometheus
-      sha: "8d893c8fae39b7ebf7338e694a38a73cefa362d6b867a72b76fbc6f695349973"
     externalUrl: ""
     enableRemoteWriteReceiver: true
     ruleSelectorNilUsesHelmValues: false

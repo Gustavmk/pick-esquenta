@@ -13,20 +13,8 @@ alertmanager:
      - /
   config:
     global:
-      resolve_timeout: 5m
-      # The API URL to use for Slack notifications.
-      #slack_api_url: <secret>
-      #slack_api_url_file: <filepath>
-  receivers:
-    - name: default-receiver
-      # slack_configs:
-      #  - channel: '@you'
-      #    send_resolved: true
-      telegram_config:
-      - bot_token: "6531841395:AAFZcJA67hvcG6uWPfxW76Y1R41nz8wskwI"
-        chat_id: "@PromTest2123"
-        send_resolved: true
-        parse_mode: HTML
+      resolve_timeout: 7m
+
 
 grafana:
   ingress:
