@@ -13,7 +13,7 @@ alertmanager:
      - /
   config:
     global:
-      resolve_timeout: 7m
+      resolve_timeout: 5m
 
 
 grafana:
