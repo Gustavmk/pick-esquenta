@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bad-app
+  namespace: production
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/app: bad-app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/app: bad-app
+    spec:
+      containers:
+        - name: bad-app
+          image: busybox
+          command: ['exit', '1']

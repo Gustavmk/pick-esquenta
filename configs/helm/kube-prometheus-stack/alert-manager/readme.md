@@ -1,28 +1,58 @@
+# Notes for AlertManager configuration 
+
+- link to talk with The BotFather. https://telegram.me/BotFather. For a description of the Bot API, see this page: https://core.telegram.org/bots/api
+- AlertManager https://prometheus.io/docs/alerting/latest/configuration/
+- Kube-prometheus-stack https://prometheus-operator.dev/docs/user-guides/alerting/
+- Helm chart https://github.com/prometheus-operator/kube-prometheus
+
+Videos to take a look
+- https://www.youtube.com/watch?v=pPpm06Gz1IE
+- https://www.youtube.com/watch?v=HiIV-TyS-O8
 
 
-link to talk with The BotFather. https://telegram.me/BotFather
+## Telegram
 
-Done! Congratulations on your new bot. You will find it at t.me/testePrometheusBot. You can now add a description, about section and profile picture for your bot, see /help for a list of commands. By the way, when you've finished creating your cool bot, ping our Bot Support if you want a better username for it. Just make sure the bot is fully operational before you do this.
+```json
+GET https://api.telegram.org/botYOUR_BOT_TOKEN/getUpdates
 
-Use this token to access the HTTP API:
-6531841395:AAFZcJA67hvcG6uWPfxW76Y1R41nz8wskwI
-Keep your token secure and store it safely, it can be used by anyone to control your bot.
+RESULT: 
+"channel_post":{"message_id":5,"sender_chat":{"id":-1002019095946,"title":"PromTest2123","type":"channel"},"chat":{"id":-1002019095946,"title":"PromTest2123","type":"channel"},"date":1708206931,"text":"'oi"}}]}
 
-For a description of the Bot API, see this page: https://core.telegram.org/bots/api
+# test API
+curl -X POST "https://api.telegram.org/botXXX:YYYY/sendMessage" -d "chat_id=-zzzzzzzzzz&text=my sample text"
 
+curl -X POST "https://api.telegram.org/bot111111111:XXXXXXXXXXXXXXXXXXXX/sendMessage" -d "chat_id=-12345534343&text=my sample text"
 
-AlertManager https://prometheus.io/docs/alerting/latest/configuration/
-Kube-prometheus-stack https://prometheus-operator.dev/docs/user-guides/alerting/
-Helm chart https://github.com/prometheus-operator/kube-prometheus
+# More details just follow this: https://velenux.wordpress.com/2022/09/12/how-to-configure-prometheus-alertmanager-to-send-alerts-to-telegram/
+```
 
-https://www.youtube.com/watch?v=pPpm06Gz1IE
-https://www.youtube.com/watch?v=HiIV-TyS-O8
-
+## Alertmanager 
 
 Atividades:
-- Criado um evento de crashLoopBack
+- [X] Criado um evento de crashLoopBack
+- [X] Criar um alerta e enviar a mensagem via telegram
+- [X] Criar um alerta customizado no alertmanager
 
-Pendente:
+# Apply Alert Manager config
 
-- Criar um alerta e enviar a mensagem via telegram
-- Criar um alerta customizado no alertmanager
+```bash
+make deploy-email-local
+make deploy-kube-prometheus-stack-local-alertmanagerconfigs
+k apply -f apps/nginx 
+
+curl -H 'Content-Type: application/json' -d '[{"labels":{"alertname":"myalert"}}]' \
+    http://alertmanager.kubernetes.docker.internal/api/v1/alerts
+
+curl -H 'Content-Type: application/json' -d '[{"labels":{"namespace":"kube-prometheus-stack"}}]' http://alertmanager.kubernetes.docker.internal/api/v1/alerts
+
+
+# Access Mailhog 
+- http://mailhog.kubernetes.docker.internal
+- Internal DNS: email-mailhog.email.svc.cluster.local:1025
+
+# deploy small alpine-based image to send mail test
+kubectl apply -f https://raw.githubusercontent.com/fabianlee/tiny-tools-with-swaks/main/k8s-tiny-tools-with-swaks.yaml
+
+kubectl exec -it deployment/tiny-tools-with-swaks -- /usr/bin/swaks -f image-test@me -t image@me -s "email-mailhog.email.svc.cluster.local" -p "1025" --body "this is a test" --header "Subject: cluster validation"
+
+```

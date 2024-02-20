@@ -1,0 +1,9 @@
+ingress:
+  enabled: true
+  annotations: {}
+  labels: {}
+  hosts:
+    - host: mailhog.kubernetes.docker.internal
+      paths:
+        - path: "/"
+          pathType: Prefix

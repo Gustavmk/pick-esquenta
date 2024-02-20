@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: kube-prometheus-stack-prometheus
+    role: alert-rules
+  name: kube-pod-crash-looping-test
+  namespace: kube-prometheus-stack 
+spec:
+  groups:
+    - name: "kube-pod-crash-looping-test.rules"
+      rules:
+        - alert: KubePodCrashLoopingTest
+          for: 1m
+          expr: rate(kube_pod_container_status_restarts_total{job="kube-state-metrics",namespace=~".*"}[5m]) * 60 * 5 > 0
+          labels:
+            severity: critical
+          annotations:
+            description: Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is restarting {{ printf "%.2f" $value }} times / 5 minutes.
+            runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepodcrashlooping
+            summary: Pod is crash looping.

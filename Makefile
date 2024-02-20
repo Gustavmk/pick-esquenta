@@ -14,6 +14,11 @@ METRICS_SERVER_CHART_VALUES := configs/helm/metrics-server/values.yml
 METRICS_SERVER_CHART_LOCAL_VALUES := configs/helm/metrics-server/values-kind.yml
 METRICS_SERVER_CHART_EKS_VALUES := configs/helm/metrics-server/values-eks.yml
 
+MAILHOG_RELEASE := email
+MAILHOG_NAMESPACE := email
+MAILHOG_CHART_VALUES := configs/helm/mailhog/values.yml
+MAILHOG_LOCAL_VALUES := configs/helm/mailhog/values-kind.yml
+
 GOLDILOCKS_NAMESPACE := goldilocks
 GOLDILOCKS_RELEASE := goldilocks
 GOLDILOCKS_CHART_VALUES := configs/helm/goldilocks/values.yml
@@ -150,6 +155,26 @@ deploy-blackbox-local:
 	kubectl apply -f ${BLACKBOX_ROOT}/service-monitor.yml -n ${BLACKBOX_NAMESPACE}
 
 ##------------------------------------------------------------------------
+##                    Comandos do Mailhog - Testando E-mail em desenvolvimento
+##------------------------------------------------------------------------
+deploy-email-local:		 					# Realiza a instalação do Mailhog server no Kind
+		helm repo add codecentric https://codecentric.github.io/helm-charts
+		helm repo update
+		helm upgrade -i ${MAILHOG_RELEASE} -n ${MAILHOG_NAMESPACE} codecentric/mailhog \
+		--values ${MAILHOG_CHART_VALUES} \
+		--values ${MAILHOG_LOCAL_VALUES} \
+		--wait \
+		--atomic \
+		--debug \
+		--timeout 3m \
+		--create-namespace
+
+
+delete-email:					# Remove a instalação do Mailhog server
+	helm uninstall ${MAILHOG_RELEASE} -n ${MAILHOG_NAMESPACE}
+	kubectl delete ns ${MAILHOG_NAMESPACE}
+
+##------------------------------------------------------------------------
 ##                    Comandos do Goldilocks
 ##------------------------------------------------------------------------
 # https://github.com/FairwindsOps/charts/tree/master/stable/goldilocks
@@ -210,6 +235,11 @@ deploy-kube-prometheus-stack-local:		# Realiza a instalação do Prometheus loca
 		--debug \
 		--timeout 3m \
 		--create-namespace
+
+deploy-kube-prometheus-stack-local-alertmanagerconfigs:		# Realiza a configuração do AlertManager localmente para testes de alertas
+	kubectl create secret generic telegram-test-config -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} \
+		--from-literal=apiToken="${ALERTMANAGER_TELEGRAM_TOKEN}" 
+	kubectl apply -f configs/helm/kube-prometheus-stack/alert-manager/alertmanager.yml
 
 deploy-kube-prometheus-stack-eks:		# Realiza a instalação do Prometheus no EKS
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
@@ -308,6 +338,14 @@ deploy-all-local:						# Sobe a infra completa localmente num cluster Kind
 	$(MAKE) deploy-metrics-server-local
 	$(MAKE) build-scan-push-local
 	$(MAKE) deploy-giropops-senhas-local
+
+deploy-infra-local:						# Sobe a infra sem Apps localmente num cluster Kind
+	$(MAKE) deploy-kind-cluster
+	$(MAKE) deploy-kube-prometheus-stack-local
+	$(MAKE) deploy-kube-prometheus-stack-local-alertmanagerconfigs
+	$(MAKE) deploy-metrics-server-local
+	$(MAKE) deploy-email-local
+	$(MAKE) deploy-goldilocks-local
 
 deploy-infra-aws:						# Sobe a infra completa na AWS
 	$(MAKE) deploy-eks-cluster

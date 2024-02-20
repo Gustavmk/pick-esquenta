@@ -9,7 +9,7 @@ alertmanager:
   ingress:
     enabled: false
   alertmanagerSpec:
-    replicas: 2
+    replicas: 1
     resources:
       requests:
         memory: 400Mi
