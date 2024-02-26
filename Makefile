@@ -23,6 +23,7 @@ GOLDILOCKS_NAMESPACE := goldilocks
 GOLDILOCKS_RELEASE := goldilocks
 GOLDILOCKS_CHART_VALUES := configs/helm/goldilocks/values.yml
 GOLDILOCKS_LOCAL_VALUES := configs/helm/goldilocks/values-local.yml
+GOLDILOCKS_AKS_VALUESS := configs/helm/goldilocks/values-aks.yml
 
 BLACKBOX_ROOT := configs/helm/blackbox-exporter
 BLACKBOX_NAMESPACE := blackbox
@@ -87,6 +88,22 @@ delete-eks-cluster:						# Remove o cluster na AWS
 set-context-eks:					# Atualiza contexto para EKS
 	aws eks --region eu-central-1 update-kubeconfig --name ${CLUSTER_NAME}
 	kubectl config use-context arn:aws:eks:eu-central-1:$(shell aws sts get-caller-identity --output json | jq '.Account' -r):cluster/${CLUSTER_NAME} 
+
+##------------------------------------------------------------------------
+##                     AZURE K8S Cluster
+##------------------------------------------------------------------------
+# TODO: criar etapa de criação de cluster AKS
+
+# deploy-aks-cluster:						# Cria o cluster na AWS
+# 	#eksctl create cluster -f ${EKSCTL_CONFIG}
+
+# delete-aks-cluster:						# Remove o cluster na AWS
+# 	#eksctl delete cluster --name=${CLUSTER_NAME}
+
+# set-context-aks:					# Atualiza contexto para EKS
+# 	az account set -s ${AZURE_AKS_SUBSCRIPTION} 
+# 	az aks get-credentials --resource-group ${AZURE_} --name aks-mvx-development-eastus-1 --overwrite-existing
+# 	#kubectl config use-context arn:aws:eks:eu-central-1:$(shell aws sts get-caller-identity --output json | jq '.Account' -r):cluster/${CLUSTER_NAME} 
 
 ##------------------------------------------------------------------------
 ##                     Comandos do Ingress - EKS
@@ -190,6 +207,19 @@ deploy-goldilocks-local:					# Realiza a instalação do Metrics Server no Kind
 		--create-namespace
 
 
+deploy-goldilocks-aks:					# Realiza a instalação do Metrics Server no Kind
+		helm repo add fairwinds-stable https://charts.fairwinds.com/stable
+		helm upgrade -i ${GOLDILOCKS_RELEASE} -n ${GOLDILOCKS_NAMESPACE} fairwinds-stable/goldilocks \
+		--values ${GOLDILOCKS_CHART_VALUES} \
+		--values ${GOLDILOCKS_AKS_VALUES} \
+		--wait \
+		--atomic \
+		--debug \
+		--timeout 3m \
+		--create-namespace
+
+
+
 delete-goldilocks:					# Remove a instalação do Metrics Server no EKS
 	helm uninstall ${GOLDILOCKS_RELEASE} -n ${GOLDILOCKS_NAMESPACE}
 	kubectl delete ns ${GOLDILOCKS_NAMESPACE}
@@ -237,9 +267,13 @@ deploy-kube-prometheus-stack-local:		# Realiza a instalação do Prometheus loca
 		--create-namespace
 
 deploy-kube-prometheus-stack-local-alertmanagerconfigs:		# Realiza a configuração do AlertManager localmente para testes de alertas
-	kubectl create secret generic telegram-test-config -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} \
+	kubectl get secret telegram-test-config --ignore-not-found || kubectl create secret generic telegram-test-config -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} \
 		--from-literal=apiToken="${ALERTMANAGER_TELEGRAM_TOKEN}" 
 	kubectl apply -f configs/helm/kube-prometheus-stack/alert-manager/alertmanager.yml
+	kubectl delete pod -n kube-prometheus-stack alertmanager-kube-prometheus-stack-alertmanager-0
+	kubectl apply -f apps/nginx/
+	kubectl apply -f apps/bad-app/namespace.yml
+	kubectl apply -f apps/bad-app/deployment.yml
 
 deploy-kube-prometheus-stack-eks:		# Realiza a instalação do Prometheus no EKS
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
