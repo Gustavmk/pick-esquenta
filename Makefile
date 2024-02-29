@@ -69,6 +69,7 @@ deploy-kind-cluster:					# Realiza a instalação do cluster local
 	kind get clusters | grep -i ${CLUSTER_NAME} && echo "Cluster já existe" || kind create cluster --wait 120s --name ${CLUSTER_NAME} --config ${CLUSTER_CONFIG}
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 	kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=270s
+	kubectl apply -f configs/kind/namespace.yml
 
 delete-kind-cluster:					# Remove o cluster local
 	kind get clusters | grep -i ${CLUSTER_NAME} && kind delete clusters ${CLUSTER_NAME} || echo "Cluster não existe"
@@ -378,7 +379,7 @@ deploy-all-local:						# Sobe a infra completa localmente num cluster Kind
 deploy-infra-local:						# Sobe a infra sem Apps localmente num cluster Kind
 	$(MAKE) deploy-kind-cluster
 	$(MAKE) deploy-kube-prometheus-stack-local
-	$(MAKE) deploy-kube-prometheus-stack-local-alertmanagerconfigs
+	$(MAKE) deploy-kube-prometheus-stack-alertmanager-config-local
 	$(MAKE) deploy-metrics-server-local
 	$(MAKE) deploy-email-local
 	$(MAKE) deploy-goldilocks-local
