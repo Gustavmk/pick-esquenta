@@ -46,6 +46,7 @@ KUBE_PROMETHEUS_STACK_RELESE := kube-prometheus-stack
 KUBE_PROMETHEUS_STACK_CHART_VALUES := configs/helm/kube-prometheus-stack/values.yml
 KUBE_PROMETHEUS_STACK_CHART_LOCAL_VALUES := configs/helm/kube-prometheus-stack/values-kind.yml
 KUBE_PROMETHEUS_STACK_CHART_EKS_VALUES := configs/helm/kube-prometheus-stack/values-eks.yml
+KUBE_PROMETHEUS_STACK_CHART_LOCAL_ALERTMANAGER_VALUES := configs/helm/kube-prometheus-stack/values-kind-alert.yml
 
 GIROPOPS_SENHAS_ROOT := apps/giropops-senhas
 GIROPOPS_SENHAS_BASE := ${GIROPOPS_SENHAS_ROOT}/manifests/base
@@ -260,17 +261,18 @@ deploy-kube-prometheus-stack-local:		# Realiza a instalação do Prometheus loca
 	helm upgrade -i ${KUBE_PROMETHEUS_STACK_RELESE} -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} prometheus-community/kube-prometheus-stack \
 		--values ${KUBE_PROMETHEUS_STACK_CHART_VALUES} \
 		--values ${KUBE_PROMETHEUS_STACK_CHART_LOCAL_VALUES} \
+		--values ${KUBE_PROMETHEUS_STACK_CHART_LOCAL_ALERTMANAGER_VALUES} \
 		--wait \
 		--atomic \
 		--debug \
 		--timeout 3m \
 		--create-namespace
 
-deploy-kube-prometheus-stack-local-alertmanagerconfigs:		# Realiza a configuração do AlertManager localmente para testes de alertas
+deploy-kube-prometheus-stack-alertmanager-config-local:		# Realiza a configuração do AlertManager localmente para testes de alertas
 	kubectl get secret telegram-test-config --ignore-not-found || kubectl create secret generic telegram-test-config -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} \
 		--from-literal=apiToken="${ALERTMANAGER_TELEGRAM_TOKEN}" 
-	kubectl apply -f configs/helm/kube-prometheus-stack/alert-manager/alertmanager.yml
-	kubectl delete pod -n kube-prometheus-stack alertmanager-kube-prometheus-stack-alertmanager-0
+	#kubectl apply -f configs/helm/kube-prometheus-stack/alert-manager/alertmanager.yml
+	#kubectl delete pod -n kube-prometheus-stack alertmanager-kube-prometheus-stack-alertmanager-0
 	kubectl apply -f apps/nginx/
 	kubectl apply -f apps/bad-app/namespace.yml
 	kubectl apply -f apps/bad-app/deployment.yml
