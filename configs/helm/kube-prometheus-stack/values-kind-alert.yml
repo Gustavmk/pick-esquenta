@@ -1,0 +1,63 @@
+alertmanager:
+  config:
+    global:
+      resolve_timeout: 5m
+
+    inhibit_rules:
+      - source_matchers:
+          - 'severity = critical'
+        target_matchers:
+          - 'severity =~ warning|info'
+        equal:
+          - 'namespace'
+          - 'alertname'
+      - source_matchers:
+          - 'severity = warning'
+        target_matchers:
+          - 'severity = info'
+        equal:
+          - 'namespace'
+          - 'alertname'
+      - source_matchers:
+          - 'alertname = InfoInhibitor'
+        target_matchers:
+          - 'severity = info'
+        equal:
+          - 'namespace'
+      - target_matchers:
+          - 'alertname = InfoInhibitor'
+    
+    route:
+      group_by: ['job']
+      group_wait: 5s
+      group_interval: 1m
+      repeat_interval: 1h
+      receiver: 'email-test'
+      routes:
+      - receiver: 'null'
+        matchers:
+          - alertname = "Watchdog"
+      - receiver: 'telegram-test'
+        matchers:
+          - namespace = "production"
+
+    receivers:
+    - name: 'null'
+    - name: 'email-test'
+      email_configs:
+        - to: notify@example.com
+          from: noreply@example.com
+          require_tls: false
+          smarthost: email-mailhog.email.svc.cluster.local:1025
+          send_resolved: true
+    - name: 'telegram-test'
+      telegramConfigs:
+        - botToken:
+            name: telegram-test-config
+            key: apiToken
+          chatID: -1002019095946
+          #message: "summary: {{ .CommonAnnotations.summary }}\ndescription: {{ .CommonAnnotations.description }}"
+          sendResolved: true
+
+    templates:
+    - '/etc/alertmanager/config/*.tmpl'
