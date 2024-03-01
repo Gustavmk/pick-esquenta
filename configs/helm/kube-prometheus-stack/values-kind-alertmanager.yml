@@ -1,9 +1,20 @@
 alertmanager:
+
+  alertmanagerSpec:
+    secrets:
+
+  ingress:
+    enabled: true
+    hosts: 
+      - alertmanager.kubernetes.docker.internal
+    paths:
+     - /
+
   extraSecretMounts:
     - name: secret-files
       mountPath: /etc/secrets
       subPath: ""
-      secretName: alertmanager-secrets
+      secretName: alertmanager-secret-files
       readOnly: true
 
   config:
@@ -58,11 +69,9 @@ alertmanager:
           send_resolved: true
     - name: 'telegram-test'
       telegram_configs:
-        - bot_token_file: '/etc/secrets/telegram-api-token'
+        - bot_token: '6531841395:AAFZcJA67hvcG6uWPfxW76Y1R41nz8wskwI'
+          # bot_token_file: '/alertmanager/secrets/telegram-api-token'
           chat_id: -1002019095946
-          message: "summary: {{ .CommonAnnotations.summary }}\ndescription: {{ .CommonAnnotations.description }}"
+          #message: "summary: {{ .CommonAnnotations.summary }}\ndescription: {{ .CommonAnnotations.description }}"
           parse_mode: 'HTML'
           send_resolved: true
-
-    templates:
-    - '/etc/alertmanager/config/*.tmpl'

@@ -45,8 +45,8 @@ KUBE_PROMETHEUS_STACK_NAMESPACE := kube-prometheus-stack
 KUBE_PROMETHEUS_STACK_RELESE := kube-prometheus-stack
 KUBE_PROMETHEUS_STACK_CHART_VALUES := configs/helm/kube-prometheus-stack/values.yml
 KUBE_PROMETHEUS_STACK_CHART_LOCAL_VALUES := configs/helm/kube-prometheus-stack/values-kind.yml
+KUBE_PROMETHEUS_STACK_CHART_LOCAL_ALERTMANAGER_VALUES := configs/helm/kube-prometheus-stack/values-kind-alertmanager.yml
 KUBE_PROMETHEUS_STACK_CHART_EKS_VALUES := configs/helm/kube-prometheus-stack/values-eks.yml
-KUBE_PROMETHEUS_STACK_CHART_LOCAL_ALERTMANAGER_VALUES := configs/helm/kube-prometheus-stack/values-kind-alert.yml
 
 GIROPOPS_SENHAS_ROOT := apps/giropops-senhas
 GIROPOPS_SENHAS_BASE := ${GIROPOPS_SENHAS_ROOT}/manifests/base
@@ -268,11 +268,11 @@ deploy-kube-prometheus-stack-local:		# Realiza a instalação do Prometheus loca
 		--debug \
 		--timeout 3m \
 		--create-namespace
+		$(MAKE) deploy-kube-prometheus-stack-alertmanager-config-local
 
 deploy-kube-prometheus-stack-alertmanager-config-local:		# Realiza a configuração do AlertManager localmente para testes de alertas
-	kubectl get secret telegram-test-config || kubectl delete secret alertmanager-secrets -n ${KUBE_PROMETHEUS_STACK_NAMESPACE}
-	kubectl create secret generic alertmanager-secrets \
-		-n ${KUBE_PROMETHEUS_STACK_NAMESPACE} \
+	kubectl delete secret -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} alertmanager-secrets
+	kubectl create secret generic -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} alertmanager-secret-files \
   		--from-literal="opsgenie-api-key=${ALERTMANAGER_OPSGENIE_API_KEY}" \
   		--from-literal="slack-api-url=${ALERTMANAGER_SLACK_API_URL}" \
 	    --from-literal="telegram-api-token=${ALERTMANAGER_TELEGRAM_TOKEN}" 

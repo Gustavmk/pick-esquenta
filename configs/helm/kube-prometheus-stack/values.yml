@@ -13,12 +13,6 @@ alertmanager:
     enabled: false
   alertmanagerSpec:
     replicas: 1
-    resources:
-      requests:
-        memory: 400Mi
-        cpu: 500m
-      limits:
-        memory: 1Gi
 
 grafana:
   enabled: true

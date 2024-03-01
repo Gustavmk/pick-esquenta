@@ -4,18 +4,6 @@ defaultRules:
     Watchdog: true
     InfoInhibitor: true
 
-alertmanager:
-  ingress:
-    enabled: true
-    hosts: 
-      - alertmanager.kubernetes.docker.internal
-    paths:
-     - /
-  config:
-    global:
-      resolve_timeout: 5m
-
-
 grafana:
   ingress:
     enabled: true
