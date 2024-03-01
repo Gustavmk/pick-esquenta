@@ -270,10 +270,13 @@ deploy-kube-prometheus-stack-local:		# Realiza a instalação do Prometheus loca
 		--create-namespace
 
 deploy-kube-prometheus-stack-alertmanager-config-local:		# Realiza a configuração do AlertManager localmente para testes de alertas
-	kubectl get secret telegram-test-config --ignore-not-found || kubectl create secret generic telegram-test-config -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} \
-		--from-literal=apiToken="${ALERTMANAGER_TELEGRAM_TOKEN}" 
-	#kubectl apply -f configs/helm/kube-prometheus-stack/alert-manager/alertmanager.yml
-	#kubectl delete pod -n kube-prometheus-stack alertmanager-kube-prometheus-stack-alertmanager-0
+	kubectl get secret telegram-test-config || kubectl delete secret alertmanager-secrets -n ${KUBE_PROMETHEUS_STACK_NAMESPACE}
+	kubectl create secret generic alertmanager-secrets \
+		-n ${KUBE_PROMETHEUS_STACK_NAMESPACE} \
+  		--from-literal="opsgenie-api-key=${ALERTMANAGER_OPSGENIE_API_KEY}" \
+  		--from-literal="slack-api-url=${ALERTMANAGER_SLACK_API_URL}" \
+	    --from-literal="telegram-api-token=${ALERTMANAGER_TELEGRAM_TOKEN}" 
+	kubectl delete pod -n kube-prometheus-stack alertmanager-kube-prometheus-stack-alertmanager-0
 	kubectl apply -f apps/nginx/
 	kubectl apply -f apps/bad-app/namespace.yml
 	kubectl apply -f apps/bad-app/deployment.yml

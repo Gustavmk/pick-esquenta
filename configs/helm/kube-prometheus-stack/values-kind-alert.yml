@@ -1,8 +1,14 @@
 alertmanager:
+  extraSecretMounts:
+    - name: secret-files
+      mountPath: /etc/secrets
+      subPath: ""
+      secretName: alertmanager-secrets
+      readOnly: true
+
   config:
     global:
       resolve_timeout: 5m
-
     inhibit_rules:
       - source_matchers:
           - 'severity = critical'
@@ -31,7 +37,7 @@ alertmanager:
       group_by: ['job']
       group_wait: 5s
       group_interval: 1m
-      repeat_interval: 1h
+      repeat_interval: 1h # 1h original
       receiver: 'email-test'
       routes:
       - receiver: 'null'
@@ -51,13 +57,12 @@ alertmanager:
           smarthost: email-mailhog.email.svc.cluster.local:1025
           send_resolved: true
     - name: 'telegram-test'
-      telegramConfigs:
-        - botToken:
-            name: telegram-test-config
-            key: apiToken
-          chatID: -1002019095946
-          #message: "summary: {{ .CommonAnnotations.summary }}\ndescription: {{ .CommonAnnotations.description }}"
-          sendResolved: true
+      telegram_configs:
+        - bot_token_file: '/etc/secrets/telegram-api-token'
+          chat_id: -1002019095946
+          message: "summary: {{ .CommonAnnotations.summary }}\ndescription: {{ .CommonAnnotations.description }}"
+          parse_mode: 'HTML'
+          send_resolved: true
 
     templates:
     - '/etc/alertmanager/config/*.tmpl'

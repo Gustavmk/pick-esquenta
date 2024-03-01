@@ -2,6 +2,9 @@ defaultRules:
   create: false
 
 alertmanager:
+  service:
+    annotations:
+      prometheus.io/scrape: "true"  
   podDisruptionBudget:
     enabled: true
     minAvailable: 1
