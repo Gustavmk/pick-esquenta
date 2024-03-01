@@ -2,6 +2,7 @@ alertmanager:
 
   alertmanagerSpec:
     secrets:
+    - alertmanager-secret-files
 
   ingress:
     enabled: true
@@ -10,12 +11,13 @@ alertmanager:
     paths:
      - /
 
-  extraSecretMounts:
-    - name: secret-files
-      mountPath: /etc/secrets
-      subPath: ""
-      secretName: alertmanager-secret-files
-      readOnly: true
+  # extraSecret mount doesn't work at this time. Use the alertManagerSec.secrets instead
+  # extraSecretMounts:
+  #   - name: secret-files
+  #     mountPath: /etc/secrets
+  #     subPath: ""
+  #     secretName: alertmanager-secret-files
+  #     readOnly: true
 
   config:
     global:
@@ -69,8 +71,8 @@ alertmanager:
           send_resolved: true
     - name: 'telegram-test'
       telegram_configs:
-        - bot_token: '6531841395:AAFZcJA67hvcG6uWPfxW76Y1R41nz8wskwI'
-          # bot_token_file: '/alertmanager/secrets/telegram-api-token'
+        - bot_token_file: '/etc/alertmanager/secrets/alertmanager-secret-files/telegram-api-token'
+          #bot_token: '6531841395:AAFZcJA67hvcG6uWPfxW76Y1R41nz8wskwI'
           chat_id: -1002019095946
           #message: "summary: {{ .CommonAnnotations.summary }}\ndescription: {{ .CommonAnnotations.description }}"
           parse_mode: 'HTML'

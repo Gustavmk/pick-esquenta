@@ -271,7 +271,7 @@ deploy-kube-prometheus-stack-local:		# Realiza a instalação do Prometheus loca
 		$(MAKE) deploy-kube-prometheus-stack-alertmanager-config-local
 
 deploy-kube-prometheus-stack-alertmanager-config-local:		# Realiza a configuração do AlertManager localmente para testes de alertas
-	kubectl delete secret -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} alertmanager-secrets
+	# kubectl delete secret -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} alertmanager-secrets
 	kubectl create secret generic -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} alertmanager-secret-files \
   		--from-literal="opsgenie-api-key=${ALERTMANAGER_OPSGENIE_API_KEY}" \
   		--from-literal="slack-api-url=${ALERTMANAGER_SLACK_API_URL}" \
@@ -382,7 +382,6 @@ deploy-all-local:						# Sobe a infra completa localmente num cluster Kind
 deploy-infra-local:						# Sobe a infra sem Apps localmente num cluster Kind
 	$(MAKE) deploy-kind-cluster
 	$(MAKE) deploy-kube-prometheus-stack-local
-	$(MAKE) deploy-kube-prometheus-stack-alertmanager-config-local
 	$(MAKE) deploy-metrics-server-local
 	$(MAKE) deploy-email-local
 	$(MAKE) deploy-goldilocks-local
