@@ -19,6 +19,12 @@ MAILHOG_NAMESPACE := email
 MAILHOG_CHART_VALUES := configs/helm/mailhog/values.yml
 MAILHOG_LOCAL_VALUES := configs/helm/mailhog/values-kind.yml
 
+GRAFANA_LOKI_RELEASE := loki
+GRAFANA_LOKI_NAMESPACE := loki
+GRAFANA_LOKI_CHART_VALUES := configs/helm/grafana-loki/values.yml
+GRAFANA_LOKI_LOCAL_VALUES := configs/helm/grafana-loki/values-local.yml
+GRAFANA_LOKI_AKS_VALUES := configs/helm/grafana-loki/values-aks.yml
+
 GOLDILOCKS_NAMESPACE := goldilocks
 GOLDILOCKS_RELEASE := goldilocks
 GOLDILOCKS_CHART_VALUES := configs/helm/goldilocks/values.yml
@@ -194,6 +200,34 @@ delete-email:					# Remove a instalação do Mailhog server
 	kubectl delete ns ${MAILHOG_NAMESPACE}
 
 ##------------------------------------------------------------------------
+##                    Comandos do Grafana Loki
+##------------------------------------------------------------------------
+deploy-grafana-loki-local:					# Comment here
+		helm repo add grafana https://grafana.github.io/helm-charts
+		helm upgrade -i ${GRAFANA_LOKI_RELEASE} -n ${GRAFANA_LOKI_NAMESPACE} grafana/loki \
+		--values ${GRAFANA_LOKI_CHART_VALUES} \
+		--values ${GRAFANA_LOKI_LOCAL_VALUES} \
+		--wait \
+		--atomic \
+		--debug \
+		--timeout 3m \
+		--create-namespace
+
+deploy-grafana-loki-aks:					# Comment here
+		helm repo add grafana https://grafana.github.io/helm-charts
+		helm upgrade -i ${GRAFANA_LOKI_RELEASE} -n ${GRAFANA_LOKI_NAMESPACE} grafana/loki \
+		--values ${GRAFANA_LOKI_CHART_VALUES} \
+		--values ${GRAFANA_LOKI_AKS_VALUES} \
+		--wait \
+		--atomic \
+		--debug \
+		--timeout 3m \
+		--create-namespace
+
+delete-grafana-loki:					# Comment here
+	helm uninstall ${GRAFANA_LOKI_RELEASE} -n ${GRAFANA_LOKI_NAMESPACE}
+	kubectl delete ns ${GRAFANA_LOKI_NAMESPACE}
+##------------------------------------------------------------------------
 ##                    Comandos do Goldilocks
 ##------------------------------------------------------------------------
 # https://github.com/FairwindsOps/charts/tree/master/stable/goldilocks
@@ -219,8 +253,6 @@ deploy-goldilocks-aks:					# Realiza a instalação do Metrics Server no Kind
 		--debug \
 		--timeout 3m \
 		--create-namespace
-
-
 
 delete-goldilocks:					# Remove a instalação do Metrics Server no EKS
 	helm uninstall ${GOLDILOCKS_RELEASE} -n ${GOLDILOCKS_NAMESPACE}
