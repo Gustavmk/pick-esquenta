@@ -9,6 +9,13 @@ grafana:
     enabled: true
     hosts:
       - grafana.kubernetes.docker.internal
+  sidecar:
+    datasources:
+      defaultDatasourceEnabled: true
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      url: http://loki-loki-distributed-query-frontend.monitoring:3100
 
 prometheus:
   ingress:

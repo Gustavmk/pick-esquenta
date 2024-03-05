@@ -11,17 +11,46 @@ alertmanager:
     paths:
      - /
 
-  # extraSecret mount doesn't work at this time. Use the alertManagerSec.secrets instead
-  # extraSecretMounts:
-  #   - name: secret-files
-  #     mountPath: /etc/secrets
-  #     subPath: ""
-  #     secretName: alertmanager-secret-files
-  #     readOnly: true
-
   config:
     global:
       resolve_timeout: 5m
+ 
+    route:
+      group_by: ['job']
+      group_wait: 5s
+      group_interval: 5m
+      repeat_interval: 12h 
+      receiver: 'email-test'
+      
+      routes:
+      - matchers:
+          - alertname = "Watchdog"
+        receiver: 'null'
+      - matchers:
+          - namespace = "production"
+        receiver: 'telegram-test'
+      - match:
+          alertname: DeadMansSwitch
+        receiver: 'null'
+
+    receivers:
+    - name: 'null'
+    - name: 'email-test'
+      email_configs:
+        - to: notify@example.com
+          from: noreply@example.com
+          require_tls: false
+          smarthost: email-mailhog.management.svc.cluster.local:1025
+          send_resolved: true
+    - name: 'telegram-test'
+      telegram_configs:
+        - bot_token_file: '/etc/alertmanager/secrets/alertmanager-secret-files/telegram-api-token'
+          #bot_token: '6531841395:AAFZcJA67hvcG6uWPfxW76Y1R41nz8wskwI'
+          chat_id: -1002019095946
+          #message: "summary: {{ .CommonAnnotations.summary }}\ndescription: {{ .CommonAnnotations.description }}"
+          parse_mode: 'HTML'
+          send_resolved: true
+
     inhibit_rules:
       - source_matchers:
           - 'severity = critical'
@@ -45,35 +74,3 @@ alertmanager:
           - 'namespace'
       - target_matchers:
           - 'alertname = InfoInhibitor'
-    
-    route:
-      group_by: ['job']
-      group_wait: 5s
-      group_interval: 1m
-      repeat_interval: 1h # 1h original
-      receiver: 'email-test'
-      routes:
-      - receiver: 'null'
-        matchers:
-          - alertname = "Watchdog"
-      - receiver: 'telegram-test'
-        matchers:
-          - namespace = "production"
-
-    receivers:
-    - name: 'null'
-    - name: 'email-test'
-      email_configs:
-        - to: notify@example.com
-          from: noreply@example.com
-          require_tls: false
-          smarthost: email-mailhog.management.svc.cluster.local:1025
-          send_resolved: true
-    - name: 'telegram-test'
-      telegram_configs:
-        - bot_token_file: '/etc/alertmanager/secrets/alertmanager-secret-files/telegram-api-token'
-          #bot_token: '6531841395:AAFZcJA67hvcG6uWPfxW76Y1R41nz8wskwI'
-          chat_id: -1002019095946
-          #message: "summary: {{ .CommonAnnotations.summary }}\ndescription: {{ .CommonAnnotations.description }}"
-          parse_mode: 'HTML'
-          send_resolved: true

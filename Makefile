@@ -26,6 +26,11 @@ GRAFANA_LOKI_CHART_VALUES := configs/helm/grafana-loki/values.yml
 GRAFANA_LOKI_LOCAL_VALUES := configs/helm/grafana-loki/values-local.yml
 GRAFANA_LOKI_AKS_VALUES := configs/helm/grafana-loki/values-aks.yml
 
+PROMTAIL_RELEASE =: promtail
+PROMTAIL_NAMESPACE =: monitoring
+PROMTAIL_CHART_VALUES =: configs/helm/promtail/values.yml
+PROMTAIL_CHART_LOCAL_VALUES =: configs/helm/promtail/values-kind.yml
+
 GOLDILOCKS_RELEASE := goldilocks
 GOLDILOCKS_NAMESPACE := management
 GOLDILOCKS_CHART_VALUES := configs/helm/goldilocks/values.yml
@@ -76,7 +81,13 @@ deploy-kind-cluster:					# Realiza a instalação do cluster local
 	kind get clusters | grep -i ${CLUSTER_NAME} && echo "Cluster já existe" || kind create cluster --wait 120s --name ${CLUSTER_NAME} --config ${CLUSTER_CONFIG}
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 	kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=270s
+	$(MAKE) deploy-app-tests
+
+deploy-app-tests: 						# Provisiona recursos para testes locais
 	kubectl apply -f configs/kind/namespace.yml
+	kubectl apply -f apps/nginx/
+	kubectl apply -f apps/bad-app/namespace.yml
+	kubectl apply -f apps/bad-app/deployment.yml
 
 delete-kind-cluster:					# Remove o cluster local
 	kind get clusters | grep -i ${CLUSTER_NAME} && kind delete clusters ${CLUSTER_NAME} || echo "Cluster não existe"
@@ -201,36 +212,6 @@ delete-email:					# Remove a instalação do Mailhog server
 	kubectl delete ns ${MAILHOG_NAMESPACE}
 
 ##------------------------------------------------------------------------
-##                    Comandos do Grafana Loki
-##------------------------------------------------------------------------
-deploy-grafana-loki-local:					# Comment here
-		helm repo add grafana https://grafana.github.io/helm-charts
-		helm upgrade -i ${GRAFANA_LOKI_RELEASE} -n ${GRAFANA_LOKI_NAMESPACE} grafana/loki \
-		--version ${GRAFANA_LOKI_VERSION} \
-		--values ${GRAFANA_LOKI_CHART_VALUES} \
-		--values ${GRAFANA_LOKI_LOCAL_VALUES} \
-		--wait \
-		--atomic \
-		--debug \
-		--timeout 3m \
-		--create-namespace
-
-deploy-grafana-loki-aks:					# Comment here
-		helm repo add grafana https://grafana.github.io/helm-charts
-		helm upgrade -i ${GRAFANA_LOKI_RELEASE} -n ${GRAFANA_LOKI_NAMESPACE} grafana/loki \
-		--version ${GRAFANA_LOKI_VERSION} \
-		--values ${GRAFANA_LOKI_CHART_VALUES} \
-		--values ${GRAFANA_LOKI_AKS_VALUES} \
-		--wait \
-		--atomic \
-		--debug \
-		--timeout 3m \
-		--create-namespace
-
-delete-grafana-loki:					# Comment here
-	helm uninstall ${GRAFANA_LOKI_RELEASE} -n ${GRAFANA_LOKI_NAMESPACE}
-	kubectl delete ns ${GRAFANA_LOKI_NAMESPACE}
-##------------------------------------------------------------------------
 ##                    Comandos do Goldilocks
 ##------------------------------------------------------------------------
 # https://github.com/FairwindsOps/charts/tree/master/stable/goldilocks
@@ -291,7 +272,7 @@ delete-redis:							# Remove a instalação do Redis
 ##------------------------------------------------------------------------
 ##                     Comandos do Prometheus
 ##------------------------------------------------------------------------
-deploy-monitoring-local:		# Realiza a instalação do Prometheus localmente
+deploy-kube-prometheus-stack-local:		# Realiza a instalação do Prometheus localmente
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 	helm repo update
 	helm upgrade -i ${KUBE_PROMETHEUS_STACK_RELESE} -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} prometheus-community/kube-prometheus-stack \
@@ -303,20 +284,16 @@ deploy-monitoring-local:		# Realiza a instalação do Prometheus localmente
 		--debug \
 		--timeout 3m \
 		--create-namespace
-		$(MAKE) deploy-kube-prometheus-stack-alertmanager-config-local
 
-deploy-monitoring-alertmanager-config-local:		# Realiza a configuração do AlertManager localmente para testes de alertas
-	kubectl get secret -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} alertmanager-secrets && kubectl delete secret -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} alertmanager-secrets
+deploy-kube-prometheus-stack-alertmanager-config-local:		# Realiza a configuração do AlertManager localmente para testes de alertas
+	kubectl delete secret --ignore-not-found -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} alertmanager-secret-files
 	kubectl create secret generic -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} alertmanager-secret-files \
   		--from-literal="opsgenie-api-key=${ALERTMANAGER_OPSGENIE_API_KEY}" \
   		--from-literal="slack-api-url=${ALERTMANAGER_SLACK_API_URL}" \
 	    --from-literal="telegram-api-token=${ALERTMANAGER_TELEGRAM_TOKEN}" 
-	kubectl delete pod -n kube-prometheus-stack alertmanager-kube-prometheus-stack-alertmanager-0
-	kubectl apply -f apps/nginx/
-	kubectl apply -f apps/bad-app/namespace.yml
-	kubectl apply -f apps/bad-app/deployment.yml
+	kubectl delete pod --ignore-not-found -n kube-prometheus-stack alertmanager-kube-prometheus-stack-alertmanager-0
 
-deploy-monitoring-eks:		# Realiza a instalação do Prometheus no EKS
+deploy-kube-prometheus-stack-eks:		# Realiza a instalação do Prometheus no EKS
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 	helm repo update
 	helm upgrade -i ${KUBE_PROMETHEUS_STACK_RELESE} -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} prometheus-community/kube-prometheus-stack \
@@ -328,7 +305,7 @@ deploy-monitoring-eks:		# Realiza a instalação do Prometheus no EKS
 		--timeout 3m \
 		--create-namespace
 
-deploy-monitoring:			# Remove a instalação do Prometheus
+deploy-kube-prometheus-stack:			# Remove a instalação do Prometheus
 	helm uninstall ${KUBE_PROMETHEUS_STACK_RELESE} -n ${KUBE_PROMETHEUS_STACK_NAMESPACE}
 	kubectl delete namespace ${KUBE_PROMETHEUS_STACK_NAMESPACE}
 	kubectl delete crd alertmanagerconfigs.monitoring.coreos.com
@@ -342,6 +319,46 @@ deploy-monitoring:			# Remove a instalação do Prometheus
 	kubectl delete crd servicemonitors.monitoring.coreos.com
 	kubectl delete crd thanosrulers.monitoring.coreos.com
 
+##------------------------------------------------------------------------
+##                    Comandos do Grafana Loki
+##------------------------------------------------------------------------
+deploy-grafana-loki-local:					# Comment here
+		helm repo add grafana https://grafana.github.io/helm-charts
+		helm upgrade -i ${GRAFANA_LOKI_RELEASE} -n ${GRAFANA_LOKI_NAMESPACE} grafana/loki \
+		--version ${GRAFANA_LOKI_VERSION} \
+		--values ${GRAFANA_LOKI_CHART_VALUES} \
+		--values ${GRAFANA_LOKI_LOCAL_VALUES} \
+		--wait \
+		--atomic \
+		--debug \
+		--timeout 3m \
+		--create-namespace
+		helm upgrade --install ${PROMTAIL_RELEASE} -n ${PROMTAIL_NAMESPACE} grafana/promtail \
+		-f ${PROMTAIL_CHART_VALUES} \
+		-f ${PROMTAIL_CHART_LOCAL_VALUES} \ 
+		--wait \
+		--atomic \
+		--debug \
+		--timeout 3m \
+		--create-namespace
+		
+
+# TODO: provisionar AKS pendente
+# deploy-grafana-loki-aks:					# Comment here
+# 		helm repo add grafana https://grafana.github.io/helm-charts
+# 		helm upgrade -i ${GRAFANA_LOKI_RELEASE} -n ${GRAFANA_LOKI_NAMESPACE} grafana/loki \
+# 		--version ${GRAFANA_LOKI_VERSION} \
+# 		--values ${GRAFANA_LOKI_CHART_VALUES} \
+# 		--values ${GRAFANA_LOKI_AKS_VALUES} \
+# 		--wait \
+# 		--atomic \
+# 		--debug \
+# 		--timeout 3m \
+# 		--create-namespace
+
+delete-grafana-loki:					# Comment here
+	helm uninstall ${GRAFANA_LOKI_RELEASE} -n ${GRAFANA_LOKI_NAMESPACE}
+	kubectl delete ns ${GRAFANA_LOKI_NAMESPACE}
 ##------------------------------------------------------------------------
 ##                     Comandos do Giropops
 ##------------------------------------------------------------------------
@@ -408,7 +425,7 @@ lint-dockerfile:						# Lint Dockerfile
 ##------------------------------------------------------------------------
 deploy-all-local:						# Sobe a infra completa localmente num cluster Kind
 	$(MAKE) deploy-kind-cluster
-	$(MAKE) deploy-monitoring-local
+	$(MAKE) deploy-kube-prometheus-stack-local
 	$(MAKE) deploy-redis-local
 	$(MAKE) deploy-metrics-server-local
 	$(MAKE) build-scan-push-local
@@ -416,15 +433,18 @@ deploy-all-local:						# Sobe a infra completa localmente num cluster Kind
 
 deploy-infra-local:						# Sobe a infra sem Apps localmente num cluster Kind
 	$(MAKE) deploy-kind-cluster
-	$(MAKE) deploy-monitoring-local
+	$(MAKE) deploy-kube-prometheus-stack-local
+	$(MAKE)	deploy-kube-prometheus-stack-alertmanager-config-local
+	$(MAKE) deploy-grafana-loki-local
 	$(MAKE) deploy-metrics-server-local
 	$(MAKE) deploy-email-local
 	$(MAKE) deploy-goldilocks-local
+	$(MAKE) deploy-blackbox-local
 
 deploy-infra-aws:						# Sobe a infra completa na AWS
 	$(MAKE) deploy-eks-cluster
 	$(MAKE) deploy-ingress-eks
-	$(MAKE) deploy-monitoring-eks
+	$(MAKE) deploy-kube-prometheus-stack-eks
 	$(MAKE) deploy-redis-eks
 	$(MAKE) deploy-metrics-server-eks
 
