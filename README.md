@@ -36,6 +36,17 @@ O carregamento pode ser feito com o comando abaixo:
 $ source .env
 ```
 
+## Ajustando configuração do host Linux
+
+
+```bash
+# "Too many open files" na hora de provisionar o PromTail. 
+sudo sysctl fs.inotify.max_user_instances=512 #valor padrão 128. 
+sudo sysctl -p
+
+# g="error creating promtail" error="error creating loki server: listen tcp :80: bind: permission denied"
+```
+
 ## Makefile e os Targets
 
 Este repositório possui um arquivo "[Makefile](./Makefile)" com diversos targets. Cada target é responsável por uma parte da solução cobrindo desde o deploy de cada peça da solução de maneira isolada até o deploy geral. 
