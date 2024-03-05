@@ -41,8 +41,10 @@ $ source .env
 
 ```bash
 # "Too many open files" na hora de provisionar o PromTail. 
-sudo sysctl fs.inotify.max_user_instances=512 #valor padrão 128. 
+sudo sysctl fs.inotify.max_user_instances=8192 #valor padrão 128. 
+sudo sysctl fs.inotify.max_user_watches=524288
 sudo sysctl -p
+# In order to make the changes permanent, i.e. to persist a reboot, you can set fs.inotify.max_user_instances=8192 and fs.inotify.max_user_watches=524288 in the file /etc/sysctl.conf
 
 ```
 
