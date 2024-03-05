@@ -324,7 +324,7 @@ deploy-kube-prometheus-stack:			# Remove a instalação do Prometheus
 ##------------------------------------------------------------------------
 deploy-grafana-loki-local:					# Comment here
 		helm repo add grafana https://grafana.github.io/helm-charts
-		helm upgrade -i ${GRAFANA_LOKI_RELEASE} -n ${GRAFANA_LOKI_NAMESPACE} grafana/loki \
+		helm upgrade -i ${GRAFANA_LOKI_RELEASE} -n ${GRAFANA_LOKI_NAMESPACE} grafana/loki-distributed \
 		--version ${GRAFANA_LOKI_VERSION} \
 		--values ${GRAFANA_LOKI_CHART_VALUES} \
 		--values ${GRAFANA_LOKI_LOCAL_VALUES} \
