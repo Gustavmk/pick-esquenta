@@ -21,15 +21,14 @@ MAILHOG_LOCAL_VALUES := configs/helm/mailhog/values-kind.yml
 
 GRAFANA_LOKI_RELEASE := loki
 GRAFANA_LOKI_NAMESPACE := monitoring
-GRAFANA_LOKI_VERSION := 5.43.3
 GRAFANA_LOKI_CHART_VALUES := configs/helm/grafana-loki/values.yml
 GRAFANA_LOKI_LOCAL_VALUES := configs/helm/grafana-loki/values-local.yml
 GRAFANA_LOKI_AKS_VALUES := configs/helm/grafana-loki/values-aks.yml
 
-PROMTAIL_RELEASE =: promtail
-PROMTAIL_NAMESPACE =: monitoring
-PROMTAIL_CHART_VALUES =: configs/helm/promtail/values.yml
-PROMTAIL_CHART_LOCAL_VALUES =: configs/helm/promtail/values-kind.yml
+PROMTAIL_RELEASE := promtail
+PROMTAIL_NAMESPACE := monitoring
+PROMTAIL_CHART_VALUES := configs/helm/promtail/values.yml
+PROMTAIL_CHART_LOCAL_VALUES := configs/helm/promtail/values-kind.yml
 
 GOLDILOCKS_RELEASE := goldilocks
 GOLDILOCKS_NAMESPACE := management
@@ -323,25 +322,23 @@ deploy-kube-prometheus-stack:			# Remove a instalação do Prometheus
 ##                    Comandos do Grafana Loki
 ##------------------------------------------------------------------------
 deploy-grafana-loki-local:					# Comment here
-		helm repo add grafana https://grafana.github.io/helm-charts
-		helm upgrade -i ${GRAFANA_LOKI_RELEASE} -n ${GRAFANA_LOKI_NAMESPACE} grafana/loki-distributed \
-		--version ${GRAFANA_LOKI_VERSION} \
-		--values ${GRAFANA_LOKI_CHART_VALUES} \
-		--values ${GRAFANA_LOKI_LOCAL_VALUES} \
-		--wait \
-		--atomic \
-		--debug \
-		--timeout 3m \
-		--create-namespace
-		helm upgrade --install ${PROMTAIL_RELEASE} -n ${PROMTAIL_NAMESPACE} grafana/promtail \
-		-f ${PROMTAIL_CHART_VALUES} \
-		-f ${PROMTAIL_CHART_LOCAL_VALUES} \ 
-		--wait \
-		--atomic \
-		--debug \
-		--timeout 3m \
-		--create-namespace
-		
+	helm repo add grafana https://grafana.github.io/helm-charts
+	helm upgrade -i ${GRAFANA_LOKI_RELEASE} -n ${GRAFANA_LOKI_NAMESPACE} grafana/loki-distributed \
+	  --values ${GRAFANA_LOKI_CHART_VALUES} \
+	  --values ${GRAFANA_LOKI_LOCAL_VALUES} \
+	  --wait \
+	  --atomic \
+	  --debug \
+	  --timeout 3m \
+	  --create-namespace
+	helm upgrade -i ${PROMTAIL_RELEASE} -n ${PROMTAIL_NAMESPACE} grafana/promtail \
+	  --values ${PROMTAIL_CHART_VALUES} \
+	  --values ${PROMTAIL_CHART_LOCAL_VALUES} \
+	  --wait \
+	  --atomic \
+	  --debug \
+	  --timeout 3m \
+	  --create-namespace
 
 # TODO: provisionar AKS pendente
 # deploy-grafana-loki-aks:					# Comment here
@@ -432,10 +429,10 @@ deploy-all-local:						# Sobe a infra completa localmente num cluster Kind
 	$(MAKE) deploy-giropops-senhas-local
 
 deploy-infra-local:						# Sobe a infra sem Apps localmente num cluster Kind
-	$(MAKE) deploy-kind-cluster
-	$(MAKE) deploy-kube-prometheus-stack-local
-	$(MAKE)	deploy-kube-prometheus-stack-alertmanager-config-local
-	$(MAKE) deploy-grafana-loki-local
+	#$(MAKE) deploy-kind-cluster
+	#$(MAKE) deploy-kube-prometheus-stack-local
+	#$(MAKE) deploy-kube-prometheus-stack-alertmanager-config-local
+	#$(MAKE) deploy-grafana-loki-local
 	$(MAKE) deploy-metrics-server-local
 	$(MAKE) deploy-email-local
 	$(MAKE) deploy-goldilocks-local
