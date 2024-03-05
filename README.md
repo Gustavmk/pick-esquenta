@@ -44,7 +44,6 @@ $ source .env
 sudo sysctl fs.inotify.max_user_instances=512 #valor padrão 128. 
 sudo sysctl -p
 
-# g="error creating promtail" error="error creating loki server: listen tcp :80: bind: permission denied"
 ```
 
 ## Makefile e os Targets
