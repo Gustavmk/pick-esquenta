@@ -429,10 +429,10 @@ deploy-all-local:						# Sobe a infra completa localmente num cluster Kind
 	$(MAKE) deploy-giropops-senhas-local
 
 deploy-infra-local:						# Sobe a infra sem Apps localmente num cluster Kind
-	#$(MAKE) deploy-kind-cluster
-	#$(MAKE) deploy-kube-prometheus-stack-local
-	#$(MAKE) deploy-kube-prometheus-stack-alertmanager-config-local
-	#$(MAKE) deploy-grafana-loki-local
+	$(MAKE) deploy-kind-cluster
+	$(MAKE) deploy-kube-prometheus-stack-local
+	$(MAKE) deploy-kube-prometheus-stack-alertmanager-config-local
+	$(MAKE) deploy-grafana-loki-local
 	$(MAKE) deploy-metrics-server-local
 	$(MAKE) deploy-email-local
 	$(MAKE) deploy-goldilocks-local
