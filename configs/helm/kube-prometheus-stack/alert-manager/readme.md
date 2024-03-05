@@ -48,11 +48,11 @@ curl -H 'Content-Type: application/json' -d '[{"labels":{"namespace":"kube-prome
 
 # Access Mailhog 
 - http://mailhog.kubernetes.docker.internal
-- Internal DNS: email-mailhog.email.svc.cluster.local:1025
+- Internal DNS: email-mailhog.management.svc.cluster.local:1025
 
 # deploy small alpine-based image to send mail test
 kubectl apply -f https://raw.githubusercontent.com/fabianlee/tiny-tools-with-swaks/main/k8s-tiny-tools-with-swaks.yaml
 
-kubectl exec -it deployment/tiny-tools-with-swaks -- /usr/bin/swaks -f image-test@me -t image@me -s "email-mailhog.email.svc.cluster.local" -p "1025" --body "this is a test" --header "Subject: cluster validation"
+kubectl exec -it deployment/tiny-tools-with-swaks -- /usr/bin/swaks -f image-test@me -t image@me -s "email-mailhog.management.svc.cluster.local" -p "1025" --body "this is a test" --header "Subject: cluster validation"
 
 ```

@@ -5,7 +5,6 @@ metadata:
     prometheus: kube-prometheus-stack-prometheus
     role: alert-rules
   name: kube-pod-crash-looping-test
-  namespace: kube-prometheus-stack 
 spec:
   groups:
     - name: "kube-pod-crash-looping-test.rules"

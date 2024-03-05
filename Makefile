@@ -15,25 +15,26 @@ METRICS_SERVER_CHART_LOCAL_VALUES := configs/helm/metrics-server/values-kind.yml
 METRICS_SERVER_CHART_EKS_VALUES := configs/helm/metrics-server/values-eks.yml
 
 MAILHOG_RELEASE := email
-MAILHOG_NAMESPACE := email
+MAILHOG_NAMESPACE := management
 MAILHOG_CHART_VALUES := configs/helm/mailhog/values.yml
 MAILHOG_LOCAL_VALUES := configs/helm/mailhog/values-kind.yml
 
 GRAFANA_LOKI_RELEASE := loki
-GRAFANA_LOKI_NAMESPACE := loki
+GRAFANA_LOKI_NAMESPACE := monitoring
+GRAFANA_LOKI_VERSION := 5.43.3
 GRAFANA_LOKI_CHART_VALUES := configs/helm/grafana-loki/values.yml
 GRAFANA_LOKI_LOCAL_VALUES := configs/helm/grafana-loki/values-local.yml
 GRAFANA_LOKI_AKS_VALUES := configs/helm/grafana-loki/values-aks.yml
 
-GOLDILOCKS_NAMESPACE := goldilocks
 GOLDILOCKS_RELEASE := goldilocks
+GOLDILOCKS_NAMESPACE := management
 GOLDILOCKS_CHART_VALUES := configs/helm/goldilocks/values.yml
 GOLDILOCKS_LOCAL_VALUES := configs/helm/goldilocks/values-local.yml
 GOLDILOCKS_AKS_VALUESS := configs/helm/goldilocks/values-aks.yml
 
-BLACKBOX_ROOT := configs/helm/blackbox-exporter
-BLACKBOX_NAMESPACE := blackbox
 BLACKBOX_RELEASE := blackbox
+BLACKBOX_NAMESPACE := monitoring
+BLACKBOX_ROOT := configs/helm/blackbox-exporter
 BLACKBOX_CHART_VALUES := ${BLACKBOX_ROOT}/values.yml
 BLACKBOX_LOCAL_VALUES := ${BLACKBOX_ROOT}/values-local.yml
 
@@ -47,8 +48,8 @@ REDIS_CHART_VALUES := configs/helm/redis/values.yml
 REDIS_CHART_LOCAL_VALUES := configs/helm/redis/values-kind.yml
 REDIS_CHART_EKS_VALUES := configs/helm/redis/values-eks.yml
 
-KUBE_PROMETHEUS_STACK_NAMESPACE := kube-prometheus-stack
 KUBE_PROMETHEUS_STACK_RELESE := kube-prometheus-stack
+KUBE_PROMETHEUS_STACK_NAMESPACE := monitoring
 KUBE_PROMETHEUS_STACK_CHART_VALUES := configs/helm/kube-prometheus-stack/values.yml
 KUBE_PROMETHEUS_STACK_CHART_LOCAL_VALUES := configs/helm/kube-prometheus-stack/values-kind.yml
 KUBE_PROMETHEUS_STACK_CHART_LOCAL_ALERTMANAGER_VALUES := configs/helm/kube-prometheus-stack/values-kind-alertmanager.yml
@@ -205,6 +206,7 @@ delete-email:					# Remove a instalação do Mailhog server
 deploy-grafana-loki-local:					# Comment here
 		helm repo add grafana https://grafana.github.io/helm-charts
 		helm upgrade -i ${GRAFANA_LOKI_RELEASE} -n ${GRAFANA_LOKI_NAMESPACE} grafana/loki \
+		--version ${GRAFANA_LOKI_VERSION} \
 		--values ${GRAFANA_LOKI_CHART_VALUES} \
 		--values ${GRAFANA_LOKI_LOCAL_VALUES} \
 		--wait \
@@ -216,6 +218,7 @@ deploy-grafana-loki-local:					# Comment here
 deploy-grafana-loki-aks:					# Comment here
 		helm repo add grafana https://grafana.github.io/helm-charts
 		helm upgrade -i ${GRAFANA_LOKI_RELEASE} -n ${GRAFANA_LOKI_NAMESPACE} grafana/loki \
+		--version ${GRAFANA_LOKI_VERSION} \
 		--values ${GRAFANA_LOKI_CHART_VALUES} \
 		--values ${GRAFANA_LOKI_AKS_VALUES} \
 		--wait \
@@ -288,7 +291,7 @@ delete-redis:							# Remove a instalação do Redis
 ##------------------------------------------------------------------------
 ##                     Comandos do Prometheus
 ##------------------------------------------------------------------------
-deploy-kube-prometheus-stack-local:		# Realiza a instalação do Prometheus localmente
+deploy-monitoring-local:		# Realiza a instalação do Prometheus localmente
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 	helm repo update
 	helm upgrade -i ${KUBE_PROMETHEUS_STACK_RELESE} -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} prometheus-community/kube-prometheus-stack \
@@ -302,8 +305,8 @@ deploy-kube-prometheus-stack-local:		# Realiza a instalação do Prometheus loca
 		--create-namespace
 		$(MAKE) deploy-kube-prometheus-stack-alertmanager-config-local
 
-deploy-kube-prometheus-stack-alertmanager-config-local:		# Realiza a configuração do AlertManager localmente para testes de alertas
-	# kubectl delete secret -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} alertmanager-secrets
+deploy-monitoring-alertmanager-config-local:		# Realiza a configuração do AlertManager localmente para testes de alertas
+	kubectl get secret -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} alertmanager-secrets && kubectl delete secret -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} alertmanager-secrets
 	kubectl create secret generic -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} alertmanager-secret-files \
   		--from-literal="opsgenie-api-key=${ALERTMANAGER_OPSGENIE_API_KEY}" \
   		--from-literal="slack-api-url=${ALERTMANAGER_SLACK_API_URL}" \
@@ -313,7 +316,7 @@ deploy-kube-prometheus-stack-alertmanager-config-local:		# Realiza a configuraç
 	kubectl apply -f apps/bad-app/namespace.yml
 	kubectl apply -f apps/bad-app/deployment.yml
 
-deploy-kube-prometheus-stack-eks:		# Realiza a instalação do Prometheus no EKS
+deploy-monitoring-eks:		# Realiza a instalação do Prometheus no EKS
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 	helm repo update
 	helm upgrade -i ${KUBE_PROMETHEUS_STACK_RELESE} -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} prometheus-community/kube-prometheus-stack \
@@ -325,7 +328,7 @@ deploy-kube-prometheus-stack-eks:		# Realiza a instalação do Prometheus no EKS
 		--timeout 3m \
 		--create-namespace
 
-delete-kube-prometheus-stack:			# Remove a instalação do Prometheus
+deploy-monitoring:			# Remove a instalação do Prometheus
 	helm uninstall ${KUBE_PROMETHEUS_STACK_RELESE} -n ${KUBE_PROMETHEUS_STACK_NAMESPACE}
 	kubectl delete namespace ${KUBE_PROMETHEUS_STACK_NAMESPACE}
 	kubectl delete crd alertmanagerconfigs.monitoring.coreos.com
@@ -405,7 +408,7 @@ lint-dockerfile:						# Lint Dockerfile
 ##------------------------------------------------------------------------
 deploy-all-local:						# Sobe a infra completa localmente num cluster Kind
 	$(MAKE) deploy-kind-cluster
-	$(MAKE) deploy-kube-prometheus-stack-local
+	$(MAKE) deploy-monitoring-local
 	$(MAKE) deploy-redis-local
 	$(MAKE) deploy-metrics-server-local
 	$(MAKE) build-scan-push-local
@@ -413,7 +416,7 @@ deploy-all-local:						# Sobe a infra completa localmente num cluster Kind
 
 deploy-infra-local:						# Sobe a infra sem Apps localmente num cluster Kind
 	$(MAKE) deploy-kind-cluster
-	$(MAKE) deploy-kube-prometheus-stack-local
+	$(MAKE) deploy-monitoring-local
 	$(MAKE) deploy-metrics-server-local
 	$(MAKE) deploy-email-local
 	$(MAKE) deploy-goldilocks-local
@@ -421,7 +424,7 @@ deploy-infra-local:						# Sobe a infra sem Apps localmente num cluster Kind
 deploy-infra-aws:						# Sobe a infra completa na AWS
 	$(MAKE) deploy-eks-cluster
 	$(MAKE) deploy-ingress-eks
-	$(MAKE) deploy-kube-prometheus-stack-eks
+	$(MAKE) deploy-monitoring-eks
 	$(MAKE) deploy-redis-eks
 	$(MAKE) deploy-metrics-server-eks
 

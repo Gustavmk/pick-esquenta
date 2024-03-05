@@ -5,7 +5,6 @@ metadata:
     prometheus: kube-prometheus-stack-prometheus
     role: alert-rules
   name: your-application-name
-  namespace: kube-prometheus-stack 
 spec:
   groups:
     - name: "your-application-name.rules"

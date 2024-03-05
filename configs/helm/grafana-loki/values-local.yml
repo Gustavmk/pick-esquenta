@@ -1,10 +1,10 @@
-loki:
-  commonConfig:
-    replication_factor: 1
-  storage:
-    type: 'filesystem'
-  rulerConfig:
-    storage:
-      type: local
-singleBinary:
-  replicas: 1
+# loki:
+#   commonConfig:
+#     replication_factor: 1
+#   storage:
+#     type: 'filesystem'
+#   rulerConfig:
+#     storage:
+#       type: local
+# singleBinary:
+#   replicas: 1

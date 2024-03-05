@@ -67,7 +67,7 @@ alertmanager:
         - to: notify@example.com
           from: noreply@example.com
           require_tls: false
-          smarthost: email-mailhog.email.svc.cluster.local:1025
+          smarthost: email-mailhog.management.svc.cluster.local:1025
           send_resolved: true
     - name: 'telegram-test'
       telegram_configs:
