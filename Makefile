@@ -100,10 +100,10 @@ set-context-kind:						# Atualiza contexto do Kind
 deploy-aks-cluster:						# Cria o cluster na Azure
 	bash configs/aks/aks-init.sh
 
-delete-aks-cluster:						# Remove o cluster na AWS
+delete-aks-cluster:						# Remove o cluster da Azure
 	bash configs/aks/aks-remove.sh
 
-set-context-aks:					# Atualiza contexto para EKS
+set-context-aks:						# Atualiza contexto para AKS
 	#aws eks --region eu-central-1 update-kubeconfig --name ${CLUSTER_NAME}
 	#kubectl config use-context arn:aws:eks:eu-central-1:$(shell aws sts get-caller-identity --output json | jq '.Account' -r):cluster/${CLUSTER_NAME} 
 
