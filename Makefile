@@ -94,6 +94,18 @@ delete-kind-cluster:					# Remove o cluster local
 set-context-kind:						# Atualiza contexto do Kind
 	kind get clusters | grep -i ${CLUSTER_NAME} || (echo "Cluster não existe" && exit 1)
 	kubectl config use-context kind-${CLUSTER_NAME}
+##------------------------------------------------------------------------
+##                     AZURE K8S Cluster
+##------------------------------------------------------------------------
+deploy-aks-cluster:						# Cria o cluster na Azure
+	bash configs/aks/aks-init.sh
+
+delete-aks-cluster:						# Remove o cluster na AWS
+	bash configs/aks/aks-remove.sh
+
+set-context-aks:					# Atualiza contexto para EKS
+	#aws eks --region eu-central-1 update-kubeconfig --name ${CLUSTER_NAME}
+	#kubectl config use-context arn:aws:eks:eu-central-1:$(shell aws sts get-caller-identity --output json | jq '.Account' -r):cluster/${CLUSTER_NAME} 
 
 ##------------------------------------------------------------------------
 ##                     AWS K8S Cluster
