@@ -4,9 +4,10 @@ metadata:
   name: mssql
   namespace: database
 spec:
-  type: LoadBalancer
+  clusterIP: None
   selector:
-    statefulset.kubernetes.io/pod-name: mssql-0
+    #statefulset.kubernetes.io/pod-name: mssql-0
+    app: mssql
   ports:
   - protocol: TCP
     port: 1433

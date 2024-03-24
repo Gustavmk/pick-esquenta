@@ -17,4 +17,9 @@ sqlcmd -S 10.3.2.4 -U SA -P '<YourPassword>'
 /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P '<YourPassword>'
 select @@version
 go
+
+# Or connect troughout headless service: ClusterIP: None
+/opt/mssql-tools/bin/sqlcmd -S 'mssql.database.svc.cluster.local' -U 'SA' -P 'MyC0m9l&xP@ssw0rd'
 ```
+
+

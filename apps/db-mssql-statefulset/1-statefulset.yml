@@ -53,8 +53,7 @@ spec:
    - metadata:
       name: pvc-mssql
      spec:
-      accessModes:
-      - ReadWriteOnce
+      accessModes: [ "ReadWriteOnce" ]
       storageClassName: standard
       resources:
        requests:
