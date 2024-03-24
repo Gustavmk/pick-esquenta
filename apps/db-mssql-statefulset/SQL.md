@@ -12,6 +12,9 @@
 ```bash
 # from remote system
 sqlcmd -S 10.3.2.4 -U SA -P '<YourPassword>'
+
 # exec in container/pod
 /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P '<YourPassword>'
+select @@version
+go
 ```
