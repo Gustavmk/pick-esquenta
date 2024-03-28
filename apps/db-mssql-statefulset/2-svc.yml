@@ -14,7 +14,7 @@ spec:
     targetPort: 1433
     name: tcpsql
   - protocol: TCP
-    port: 51000
+    port: 51000 
     targetPort: 51000
     name: dtctcpport
   - protocol: TCP
