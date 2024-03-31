@@ -1,6 +1,17 @@
 # deploy aks
 
 ```bash
+
+# Install
+helm repo add external-secrets https://charts.external-secrets.io
+
+helm install external-secrets \
+   external-secrets/external-secrets \
+    -n external-secrets \
+    --create-namespace \
+    --set installCRDs=true
+
+
 TENANT_ID=$(az account show --query tenantId | tr -d \")
 RESOURCE_GROUP="rg-pick-esquenta"
 LOCATION="eastus"
@@ -24,4 +35,48 @@ az ad app credential reset --id $APP_ID
 az keyvault set-policy --name $VAULT_NAME --object-id $SERVICE_PRINCIPAL --secret-permissions get
 
 kubectl create secret generic azure-secret-sp --from-literal=ClientID=$APP_ID --from-literal=ClientSecret=$APP_PASSWORD
+
+## deploy external secrets
+
+cat << EOF | kubectl apply -f -
+apiVersion: external-secrets.io/v1beta1
+kind: SecretStore
+metadata:
+  name: azure-backend
+spec:
+  provider:
+    azurekv:
+      tenantId: $TENANT_ID
+      vaultUrl: "https://$VAULT_NAME.vault.azure.net"
+      authSecretRef:
+        clientId:
+          name: azure-secret-sp
+          key: ClientID
+        clientSecret:
+          name: azure-secret-sp
+          key: ClientSecret
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: azure-example
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: SecretStore
+    name: azure-backend
+  target:
+    name: azure-secret
+  data:
+  - secretKey: foobar
+    remoteRef:
+      key: example-externalsecret-key
+EOF
+
+# testing
+kubectl get secret azure-secret -o jsonpath='{.data.foobar}' | base64 -d
+
+# force refresh
+kubectl annotate es azure-example force-sync=$(date +%s) --overwrite
+
 ```
