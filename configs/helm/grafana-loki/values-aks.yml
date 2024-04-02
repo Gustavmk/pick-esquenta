@@ -1,15 +1,30 @@
+singleBinary:
+  replicas: 3
+
 loki:
   commonConfig:
     replication_factor: 3
-  storage:
-    bucketNames:
-      chunks: loki-chunks
-      ruler: loki-ruler
-      admin: loki-admin
-    type: 's3'
-    s3:
-      endpoint: foo.aws.com
-      secretAccessKey: supersecret
-      accessKeyId: secret
-singleBinary:
-  replicas: 3
+  schema_config:
+    configs:
+    - from: 2020-12-11
+      store: boltdb-shipper
+      object_store: azure
+      schema: v11
+      index:
+        prefix: loki_index_
+        period: 24h
+
+  storage_config:
+    boltdb_shipper:
+      shared_store: azure
+      active_index_directory: /var/loki/index
+      cache_location: /var/loki/cache
+      cache_ttl: 24h
+  
+    azure:
+      container_name: <<container>>
+      account_name: <<account_name>>
+      account_key: <<account_key>>
+      request_timeout: 0
+
+
