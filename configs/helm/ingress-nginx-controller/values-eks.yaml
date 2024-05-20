@@ -15,3 +15,6 @@ controller:
   podAnnotations:
     prometheus.io/port: "10254"
     prometheus.io/scrape: "true"
+
+config: 
+  proxy-buffer-size: 16k

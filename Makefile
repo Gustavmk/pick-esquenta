@@ -44,7 +44,7 @@ BLACKBOX_LOCAL_VALUES := ${BLACKBOX_ROOT}/values-local.yml
 
 INGRESS_RELEASE := ingress-nginx
 INGRESS_NAMESPACE := ingress-nginx
-INGRESS_CHART_VALUES_EKS := configs/helm/ingress-nginx-controller/values.yaml
+INGRESS_CHART_VALUES_EKS := configs/helm/ingress-nginx-controller/values-eks.yaml
 
 REDIS_NAMESPACE := redis
 REDIS_RELEASE := redis
