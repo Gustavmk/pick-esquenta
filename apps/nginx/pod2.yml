@@ -3,7 +3,7 @@ kind: Pod
 metadata:
   name: nginx2
   labels:
-    app: nginx2
+    app: nginx
     app.kubernetes.io/component: blackbox
 spec:
   containers:
