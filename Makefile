@@ -13,6 +13,7 @@ METRICS_SERVER_NAMESPACE := kube-system
 METRICS_SERVER_CHART_VALUES := configs/helm/metrics-server/values.yml
 METRICS_SERVER_CHART_LOCAL_VALUES := configs/helm/metrics-server/values-kind.yml
 METRICS_SERVER_CHART_EKS_VALUES := configs/helm/metrics-server/values-eks.yml
+METRICS_SERVER_CHART_AKS_VALUES := configs/helm/metrics-server/values-aks.yml
 
 MAILHOG_RELEASE := email
 MAILHOG_NAMESPACE := management
@@ -58,6 +59,7 @@ KUBE_PROMETHEUS_STACK_CHART_VALUES := configs/helm/kube-prometheus-stack/values.
 KUBE_PROMETHEUS_STACK_CHART_LOCAL_VALUES := configs/helm/kube-prometheus-stack/values-kind.yml
 KUBE_PROMETHEUS_STACK_CHART_LOCAL_ALERTMANAGER_VALUES := configs/helm/kube-prometheus-stack/values-kind-alertmanager.yml
 KUBE_PROMETHEUS_STACK_CHART_EKS_VALUES := configs/helm/kube-prometheus-stack/values-eks.yml
+KUBE_PROMETHEUS_STACK_CHART_AKS_VALUES := configs/helm/kube-prometheus-stack/values-aks.yml
 
 GIROPOPS_SENHAS_ROOT := apps/giropops-senhas
 GIROPOPS_SENHAS_BASE := ${GIROPOPS_SENHAS_ROOT}/manifests/base
@@ -176,6 +178,19 @@ deploy-metrics-server-eks:					# Realiza a instalação do Metrics Server no EKS
 	helm upgrade -i ${METRICS_SERVER_RELEASE} -n ${METRICS_SERVER_NAMESPACE} metrics-server/metrics-server \
 		--values ${METRICS_SERVER_CHART_VALUES} \
 		--values ${METRICS_SERVER_CHART_EKS_VALUES} \
+		--wait \
+		--atomic \
+		--debug \
+		--timeout 3m \
+		--create-namespace
+
+deploy-metrics-server-aks:					# Realiza a instalação do Metrics Server no AKS
+	helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
+	helm repo update
+	# kubectl delete -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml --ignore-not-found 
+	helm upgrade -i ${METRICS_SERVER_RELEASE} -n ${METRICS_SERVER_NAMESPACE} metrics-server/metrics-server \
+		--values ${METRICS_SERVER_CHART_VALUES} \
+		--values ${METRICS_SERVER_CHART_AKS_VALUES} \
 		--wait \
 		--atomic \
 		--debug \
@@ -317,7 +332,19 @@ deploy-kube-prometheus-stack-eks:		# Realiza a instalação do Prometheus no EKS
 		--timeout 3m \
 		--create-namespace
 
-deploy-kube-prometheus-stack:			# Remove a instalação do Prometheus
+deploy-kube-prometheus-stack-aks:		# Realiza a instalação do Prometheus no AKS
+	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+	helm repo update
+	helm upgrade -i ${KUBE_PROMETHEUS_STACK_RELESE} -n ${KUBE_PROMETHEUS_STACK_NAMESPACE} prometheus-community/kube-prometheus-stack \
+		--values ${KUBE_PROMETHEUS_STACK_CHART_VALUES} \
+		--values ${KUBE_PROMETHEUS_STACK_CHART_AKS_VALUES} \
+		--wait \
+		--atomic \
+		--debug \
+		--timeout 3m \
+		--create-namespace
+
+delete-kube-prometheus-stack:			# Remove a instalação do Prometheus
 	helm uninstall ${KUBE_PROMETHEUS_STACK_RELESE} -n ${KUBE_PROMETHEUS_STACK_NAMESPACE}
 	kubectl delete namespace ${KUBE_PROMETHEUS_STACK_NAMESPACE}
 	kubectl delete crd alertmanagerconfigs.monitoring.coreos.com

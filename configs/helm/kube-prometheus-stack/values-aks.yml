@@ -1,0 +1,55 @@
+defaultRules:
+  create: true
+  disabled:
+    Watchdog: true
+    InfoInhibitor: true
+
+alertmanager:
+  ingress:
+    enabled: true
+    hosts: 
+      - alertmanager.aks-cluster.com.br
+    paths:
+     - /
+  
+grafana:
+  ingress:
+    enabled: true
+    hosts:
+      - grafana.aks-cluster.com.br
+
+kubeProxy:
+  enabled: true
+
+kubeStateMetrics:
+  enabled: true
+
+prometheus:
+  ingress:
+    enabled: true
+    hosts:
+      - prometheus.aks-cluster.com.br
+    paths:
+      - /
+    enableRemoteWriteReceiver: true
+    ruleSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    probeSelectorNilUsesHelmValues: false
+    scrapeConfigSelectorNilUsesHelmValues: false
+    retention: 10d
+    retentionSize: "8GB"
+    resources:
+      requests:
+        cpu: 500m
+        memory: 400Mi
+      limits: 
+        memory: 1Gi
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: managed-csi
+          accessModes: ["ReadWriteOnce"]
+          resources:
+           requests:
+             storage: 10Gi

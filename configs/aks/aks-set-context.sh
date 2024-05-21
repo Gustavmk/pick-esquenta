@@ -3,7 +3,7 @@ set -e
 
 clusterName="aks-pick"
 resourceGroup="rg-dev-pick"
-AZ_SUBSCRIPTION='609695b4-9130-4327-a014-cc8e212d806f'
+AZ_SUBSCRIPTION='0ee6a046-0e26-40b7-a327-8bb4f285dd69'
 
 az account set -s $AZ_SUBSCRIPTION
 
