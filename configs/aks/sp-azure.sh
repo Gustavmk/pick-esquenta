@@ -1,5 +1,5 @@
 SP_NAME="sp-deployment"
-SCOPE_SUBSCRITPION="4d0e102a-3bf6-47bd-9211-e8f794ae4b5b"
+SCOPE_SUBSCRITPION=$(echo $AZ_SUBSCRIPTION_ID)
 ROLE="contributor"
 
 az ad sp create-for-rbac --name $SP_NAME --role $ROLE --scopes "/subscriptions/${SCOPE_SUBSCRITPION}"
