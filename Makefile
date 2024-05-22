@@ -138,6 +138,14 @@ deploy-ingress-aks:						# Realiza o deploy do ingress no AKS
 		--timeout 3m \
 		--create-namespace
 
+	helm upgrade -i ${INGRESS_RELEASE} -n ${INGRESS_NAMESPACE} ingress-nginx/ingress-nginx \
+		--values ${INGRESS_CHART_VALUES_AKS} \
+		--wait \
+		--atomic \
+		--debug \
+		--timeout 3m \
+		--create-namespace
+
 delete-ingress-AKS:						# Realiza a deleção do ingress no AKS
 	helm uninstall ${INGRESS_RELEASE} -n ${INGRESS_NAMESPACE}
 	kubectl delete ns ${INGRESS_NAMESPACE}

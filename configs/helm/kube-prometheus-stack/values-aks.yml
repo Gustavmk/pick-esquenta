@@ -6,6 +6,8 @@ defaultRules:
 
 alertmanager:
   ingress:
+    annotations:
+      kubernetes.io/ingress.class: nginx
     enabled: true
     hosts: 
       - alertmanager.aks-cluster.com.br
@@ -14,6 +16,8 @@ alertmanager:
   
 grafana:
   ingress:
+    annotations:
+      kubernetes.io/ingress.class: nginx
     enabled: true
     hosts:
       - grafana.aks-cluster.com.br
@@ -27,6 +31,8 @@ kubeStateMetrics:
 prometheus:
   ingress:
     enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
     hosts:
       - prometheus.aks-cluster.com.br
     paths:
