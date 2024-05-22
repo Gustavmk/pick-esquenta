@@ -46,6 +46,7 @@ BLACKBOX_LOCAL_VALUES := ${BLACKBOX_ROOT}/values-local.yml
 INGRESS_RELEASE := ingress-nginx
 INGRESS_NAMESPACE := ingress-nginx
 INGRESS_CHART_VALUES_EKS := configs/helm/ingress-nginx-controller/values-eks.yaml
+INGRESS_CHART_VALUES_AKS := configs/helm/ingress-nginx-controller/values-aks.yaml
 
 REDIS_NAMESPACE := redis
 REDIS_RELEASE := redis
@@ -124,20 +125,22 @@ set-context-eks:					# Atualiza contexto para EKS
 	kubectl config use-context arn:aws:eks:eu-central-1:$(shell aws sts get-caller-identity --output json | jq '.Account' -r):cluster/${CLUSTER_NAME} 
 
 ##------------------------------------------------------------------------
-##                     AZURE K8S Cluster
+##                     Comandos do Ingress - AKS
 ##------------------------------------------------------------------------
-# TODO: criar etapa de criação de cluster AKS
+deploy-ingress-aks:						# Realiza o deploy do ingress no AKS
+	helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+	helm repo update
+	helm upgrade -i ${INGRESS_RELEASE} -n ${INGRESS_NAMESPACE} ingress-nginx/ingress-nginx \
+		--values ${INGRESS_CHART_VALUES_AKS} \
+		--wait \
+		--atomic \
+		--debug \
+		--timeout 3m \
+		--create-namespace
 
-# deploy-aks-cluster:						# Cria o cluster na AWS
-# 	#eksctl create cluster -f ${EKSCTL_CONFIG}
-
-# delete-aks-cluster:						# Remove o cluster na AWS
-# 	#eksctl delete cluster --name=${CLUSTER_NAME}
-
-# set-context-aks:					# Atualiza contexto para EKS
-# 	az account set -s ${AZURE_AKS_SUBSCRIPTION} 
-# 	az aks get-credentials --resource-group ${AZURE_} --name aks-mvx-development-eastus-1 --overwrite-existing
-# 	#kubectl config use-context arn:aws:eks:eu-central-1:$(shell aws sts get-caller-identity --output json | jq '.Account' -r):cluster/${CLUSTER_NAME} 
+delete-ingress-AKS:						# Realiza a deleção do ingress no AKS
+	helm uninstall ${INGRESS_RELEASE} -n ${INGRESS_NAMESPACE}
+	kubectl delete ns ${INGRESS_NAMESPACE}
 
 ##------------------------------------------------------------------------
 ##                     Comandos do Ingress - EKS
