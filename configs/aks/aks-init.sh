@@ -4,7 +4,8 @@ set -e
 clusterName="aks-pick"
 resourceGroup="rg-dev-pick"
 location="eastus"
-
+#STORAGE
+STG_NAME="$STG_NAME"
 #VNET
 vnet="vnet-aks-pick"
 
@@ -35,3 +36,10 @@ AKS_K8S_VERSION=$(echo "$GET_VERSION" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+' | grep
 
 echo "Deploying AKS with version: ${AKS_K8S_VERSION}"
 az aks create --node-count 2 --tier free --resource-group $resourceGroup --location $location --name $clusterName --network-plugin "azure" --network-plugin-mode "overlay" --network-dataplane "azure" --pod-cidr $AKS_POD_CIDR --generate-ssh-keys --kubernetes-version $AKS_K8S_VERSION --node-vm-size "$AKS_SIZE_POOL_DEFAULT" --vnet-subnet-id "/subscriptions/$AZ_SUBSCRIPTION_ID/resourceGroups/rg-dev-pick/providers/Microsoft.Network/virtualNetworks/vnet-aks-pick/subnets/aks-pool-default"
+
+
+
+az storage account create -n $STG_NAME -g $resourceGroup -l eastus --sku Standard_LRS --kind StorageV2 
+
+az storage account show-connection-string -g $resourceGroup  -n $STG_NAME
+

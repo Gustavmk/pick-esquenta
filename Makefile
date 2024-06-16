@@ -391,18 +391,6 @@ deploy-grafana-loki-local:					# Comment here
 	  --timeout 3m \
 	  --create-namespace
 
-# TODO: provisionar AKS pendente
-# deploy-grafana-loki-aks:					# Comment here
-# 		helm repo add grafana https://grafana.github.io/helm-charts
-# 		helm upgrade -i ${GRAFANA_LOKI_RELEASE} -n ${GRAFANA_LOKI_NAMESPACE} grafana/loki \
-# 		--version ${GRAFANA_LOKI_VERSION} \
-# 		--values ${GRAFANA_LOKI_CHART_VALUES} \
-# 		--values ${GRAFANA_LOKI_AKS_VALUES} \
-# 		--wait \
-# 		--atomic \
-# 		--debug \
-# 		--timeout 3m \
-# 		--create-namespace
 
 delete-grafana-loki:					# Comment here
 	helm uninstall ${GRAFANA_LOKI_RELEASE} -n ${GRAFANA_LOKI_NAMESPACE}
