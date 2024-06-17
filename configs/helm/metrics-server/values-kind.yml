@@ -1,2 +1,3 @@
 defaultArgs:
   - --kubelet-insecure-tls
+  - --cert-dir=/tmp
