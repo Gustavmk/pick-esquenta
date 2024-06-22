@@ -18,4 +18,5 @@ helm install k6-operator grafana/k6-operator
 
 
 kubectl create configmap k6-test --from-file stresstest/k6.js
-k apply -f stresstest/job.yaml 
+
+k delete -f stresstest/job.yaml ; k apply -f stresstest/job.yaml
