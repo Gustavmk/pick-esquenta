@@ -6,7 +6,7 @@ export let errorRate = new Rate('errors');
 
 export let options = {
     stages: [
-        { duration: '1m', target: 100 },
+        { duration: '5m', target: 1000 },
     ],
     thresholds: {
         errors: ['rate<0.01'], // <1% errors
