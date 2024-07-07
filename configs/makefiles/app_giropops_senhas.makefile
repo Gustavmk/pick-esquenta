@@ -12,12 +12,8 @@ GIROPOPS_SENHAS_NAMESPACE := giropops-senhas
 build-image-giropops-senhas:					# Realiza o build da imagem Giropops Senhas
 	docker build -t giropops-senhas-python-chainguard:${GIROPOPS_SENHAS_TAG} -f ${GIROPOPS_SENHAS_DOCKERFILE} ${GIROPOPS_SENHAS_ROOT}
 
-build-image-go-sample:							# Realiza o build da imagem Go Sample
-	#docker build -t go-sample:${APPS_TAG} -f ${GO_SAMPLE_DOCKERFILE} ${GO_SAMPLE_ROOT}"
-	
 build-image-all:
 	$(MAKE) build-image-giropops-senhas
-	$(MAKE) build-image-go-sample
 
 scan-image:								# Realiza o scan da imagem usando Trivy
 	#trivy image giropops-senhas-python-chainguard:${GIROPOPS_SENHAS_TAG} --severity HIGH,CRITICAL --exit-code 1
