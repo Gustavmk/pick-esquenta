@@ -5,11 +5,24 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
-cat /etc/hosts | grep -i "127.0.0.1 giropops-senhas.kubernetes.docker.internal" >> /dev/null || echo "127.0.0.1 giropops-senhas.kubernetes.docker.internal" >> /etc/hosts
-cat /etc/hosts | grep -i "127.0.0.1 alertmanager.kubernetes.docker.internal" >> /dev/null || echo "127.0.0.1 alertmanager.kubernetes.docker.internal" >> /etc/hosts
-cat /etc/hosts | grep -i "127.0.0.1 prometheus.kubernetes.docker.internal" >> /dev/null || echo "127.0.0.1 prometheus.kubernetes.docker.internal" >> /etc/hosts
-cat /etc/hosts | grep -i "127.0.0.1 grafana.kubernetes.docker.internal" >> /dev/null || echo "127.0.0.1 grafana.kubernetes.docker.internal" >> /etc/hosts
-cat /etc/hosts | grep -i "127.0.0.1 goldilocks.kubernetes.docker.internal" >> /dev/null || echo "127.0.0.1 goldilocks.kubernetes.docker.internal" >> /etc/hosts
-cat /etc/hosts | grep -i "127.0.0.1 mailhog.kubernetes.docker.internal" >> /dev/null || echo "127.0.0.1 mailhog.kubernetes.docker.internal" >> /etc/hosts
+
+# Define an array of hostnames
+hosts=(
+    "giropops-senhas.kubernetes.docker.internal"
+    "alertmanager.kubernetes.docker.internal"
+    "prometheus.kubernetes.docker.internal"
+    "grafana.kubernetes.docker.internal"
+    "goldilocks.kubernetes.docker.internal"
+    "mailhog.kubernetes.docker.internal"
+    "argocd.kubernetes.docker.internal"
+)
+
+# Loop through the hostnames
+for host in "${hosts[@]}"; do
+    # Check if the hostname is already in /etc/hosts, if not, add it
+    if ! grep -i "127.0.0.1 $host" /etc/hosts > /dev/null; then
+        echo "127.0.0.1 $host" >> /etc/hosts
+    fi
+done
 
 echo "Hosts adicionados!"
