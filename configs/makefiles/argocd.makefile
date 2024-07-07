@@ -10,9 +10,9 @@ ARGOCD_CHART_AKS_VALUES := configs/helm/argocd/values-aks.yml
 ##                    Comandos do Metrics Server
 ##------------------------------------------------------------------------
 deploy-argocd-local:					# Realiza a instalação do Metrics Server no Kind
-	helm repo add argocd https://kubernetes-sigs.github.io/argocd/
+	helm repo add argo https://argoproj.github.io/argo-helm
 	helm repo update
-	helm upgrade -i ${ARGOCD_RELEASE} -n ${ARGOCD_NAMESPACE} argocd/argocd \
+	helm upgrade -i ${ARGOCD_RELEASE} -n ${ARGOCD_NAMESPACE} argo/argo-cd \
 		--values ${ARGOCD_CHART_VALUES} \
 		--values ${ARGOCD_CHART_LOCAL_VALUES} \
 		--wait \
@@ -22,9 +22,9 @@ deploy-argocd-local:					# Realiza a instalação do Metrics Server no Kind
 		--create-namespace
 
 deploy-argocd-eks:					# Realiza a instalação do Metrics Server no EKS
-	helm repo add argocd https://kubernetes-sigs.github.io/argocd/
+	helm repo add argo https://argoproj.github.io/argo-helm
 	helm repo update
-	helm upgrade -i ${ARGOCD_RELEASE} -n ${ARGOCD_NAMESPACE} argocd/argocd \
+	helm upgrade -i ${ARGOCD_RELEASE} -n ${ARGOCD_NAMESPACE} argo/argo-cd \
 		--values ${ARGOCD_CHART_VALUES} \
 		--values ${ARGOCD_CHART_EKS_VALUES} \
 		--wait \
@@ -34,10 +34,9 @@ deploy-argocd-eks:					# Realiza a instalação do Metrics Server no EKS
 		--create-namespace
 
 deploy-argocd-aks:					# Realiza a instalação do Metrics Server no AKS
-	helm repo add argocd https://kubernetes-sigs.github.io/argocd/
+	helm repo add argo https://argoproj.github.io/argo-helm
 	helm repo update
-	# kubectl delete -f https://github.com/kubernetes-sigs/argocd/releases/latest/download/components.yaml --ignore-not-found 
-	helm upgrade -i ${ARGOCD_RELEASE} -n ${ARGOCD_NAMESPACE} argocd/argocd \
+	helm upgrade -i ${ARGOCD_RELEASE} -n ${ARGOCD_NAMESPACE} argo/argo-cd \
 		--values ${ARGOCD_CHART_VALUES} \
 		--values ${ARGOCD_CHART_AKS_VALUES} \
 		--wait \
