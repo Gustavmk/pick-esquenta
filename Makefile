@@ -1,9 +1,10 @@
 ##------------------------------------------------------------------------
 ##                     Global vars
 ##------------------------------------------------------------------------
-CLUSTER_NAME := kind
-CLUSTER_CONFIG := configs/kind/cluster.yaml
-EKSCTL_CONFIG := configs/eksctl/config.yaml
+
+include configs/makefiles/app_mailhog.makefile
+include configs/makefiles/cluster_aks.makefile
+include configs/makefiles/cluster_kind.makefile
 
 KUBERNETES_LINT_CONFIG := configs/kubelinter/kubelinter-config.yaml
 DOCKER_LINT_CONFIG := configs/hadolint/hadolint-config.yaml
@@ -15,10 +16,6 @@ METRICS_SERVER_CHART_LOCAL_VALUES := configs/helm/metrics-server/values-kind.yml
 METRICS_SERVER_CHART_EKS_VALUES := configs/helm/metrics-server/values-eks.yml
 METRICS_SERVER_CHART_AKS_VALUES := configs/helm/metrics-server/values-aks.yml
 
-MAILHOG_RELEASE := email
-MAILHOG_NAMESPACE := management
-MAILHOG_CHART_VALUES := configs/helm/mailhog/values.yml
-MAILHOG_LOCAL_VALUES := configs/helm/mailhog/values-kind.yml
 
 GRAFANA_LOKI_RELEASE := loki
 GRAFANA_LOKI_NAMESPACE := monitoring
@@ -76,40 +73,6 @@ GO_SAMPLE_EKS := ${GO_SAMPLE_ROOT}/manifests/overlays/eks
 GO_SAMPLE_DOCKERFILE := ${GO_SAMPLE_ROOT}/Dockerfile
 GO_SAMPLE_NAMESPACE := go-sample
 
-##------------------------------------------------------------------------
-##                     Local K8S Cluster
-##------------------------------------------------------------------------
-deploy-kind-cluster:					# Realiza a instalação do cluster local
-	kind get clusters | grep -i ${CLUSTER_NAME} && echo "Cluster já existe" || kind create cluster --wait 120s --name ${CLUSTER_NAME} --config ${CLUSTER_CONFIG}
-	kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
-	kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=270s
-	$(MAKE) deploy-app-tests
-
-deploy-app-tests: 						# Provisiona recursos para testes locais
-	kubectl apply -f configs/kind/namespace.yml
-	kubectl apply -f apps/nginx/
-	kubectl apply -f apps/bad-app/namespace.yml
-	kubectl apply -f apps/bad-app/deployment.yml
-
-delete-kind-cluster:					# Remove o cluster local
-	kind get clusters | grep -i ${CLUSTER_NAME} && kind delete clusters ${CLUSTER_NAME} || echo "Cluster não existe"
-
-set-context-kind:						# Atualiza contexto do Kind
-	kind get clusters | grep -i ${CLUSTER_NAME} || (echo "Cluster não existe" && exit 1)
-	kubectl config use-context kind-${CLUSTER_NAME}
-##------------------------------------------------------------------------
-##                     AZURE K8S Cluster
-##------------------------------------------------------------------------
-deploy-aks-cluster:						# Cria o cluster na Azure
-	bash configs/aks/aks-init.sh
-
-delete-aks-cluster:						# Remove o cluster da Azure
-	bash configs/aks/aks-remove.sh
-
-set-context-aks:						# Atualiza contexto para AKS
-	bash configs/aks/aks-set-context.sh
-	#aws eks --region eu-central-1 update-kubeconfig --name ${CLUSTER_NAME}
-	#kubectl config use-context arn:aws:eks:eu-central-1:$(shell aws sts get-caller-identity --output json | jq '.Account' -r):cluster/${CLUSTER_NAME} 
 
 ##------------------------------------------------------------------------
 ##                     AWS K8S Cluster
@@ -229,25 +192,6 @@ deploy-blackbox-local:
 		--create-namespace
 	kubectl apply -f ${BLACKBOX_ROOT}/service-monitor.yml -n ${BLACKBOX_NAMESPACE}
 
-##------------------------------------------------------------------------
-##                    Comandos do Mailhog - Testando E-mail em desenvolvimento
-##------------------------------------------------------------------------
-deploy-email-local:		 					# Realiza a instalação do Mailhog server no Kind
-		helm repo add codecentric https://codecentric.github.io/helm-charts
-		helm repo update
-		helm upgrade -i ${MAILHOG_RELEASE} -n ${MAILHOG_NAMESPACE} codecentric/mailhog \
-		--values ${MAILHOG_CHART_VALUES} \
-		--values ${MAILHOG_LOCAL_VALUES} \
-		--wait \
-		--atomic \
-		--debug \
-		--timeout 3m \
-		--create-namespace
-
-
-delete-email:					# Remove a instalação do Mailhog server
-	helm uninstall ${MAILHOG_RELEASE} -n ${MAILHOG_NAMESPACE}
-	kubectl delete ns ${MAILHOG_NAMESPACE}
 
 ##------------------------------------------------------------------------
 ##                    Comandos do Goldilocks
