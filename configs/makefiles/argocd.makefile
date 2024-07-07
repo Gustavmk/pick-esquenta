@@ -11,7 +11,7 @@ ARGOCD_CHART_AKS_VALUES := configs/helm/argocd/values-aks.yml
 deploy-argocd-local:					# Realiza a instalação do Metrics Server no Kind
 	helm repo add argo https://argoproj.github.io/argo-helm
 	helm repo update
-	helm upgrade -i ${ARGOCD_RELEASE} -n ${ARGOCD_NAMESPACE} argo/argo-cd \
+	helm upgrade -i "${ARGOCD_RELEASE}-cd" -n ${ARGOCD_NAMESPACE} argo/argo-cd \
 		--set crds.install=true \
 		--values ${ARGOCD_CHART_VALUES} \
 		--values ${ARGOCD_CHART_LOCAL_VALUES} \
@@ -21,9 +21,23 @@ deploy-argocd-local:					# Realiza a instalação do Metrics Server no Kind
 		--timeout 3m \
 		--create-namespace
 
-	# argo/argo-workflows
+	helm upgrade -i "${ARGOCD_RELEASE}-workflows" -n ${ARGOCD_NAMESPACE} argo/argo-workflows \
+		--set crds.install=true \
+		--wait \
+		--atomic \
+		--debug \
+		--timeout 3m \
+		--create-namespace
 
 	helm upgrade -i "${ARGOCD_RELEASE}-apps" -n ${ARGOCD_NAMESPACE} argo/argocd-apps \
+		--set crds.install=true \
+		--wait \
+		--atomic \
+		--debug \
+		--timeout 3m \
+		--create-namespace
+
+	helm upgrade -i "${ARGOCD_RELEASE}-image-updater" -n ${ARGOCD_NAMESPACE} argo/argocd-image-updater \
 		--set crds.install=true \
 		--wait \
 		--atomic \
@@ -56,5 +70,8 @@ deploy-argocd-aks:					# Realiza a instalação do Metrics Server no AKS
 		--create-namespace
 
 delete-argocd:					# Remove a instalação do Metrics Server no EKS
-	helm uninstall ${ARGOCD_RELEASE} -n ${ARGOCD_NAMESPACE}
+	helm uninstall "${ARGOCD_RELEASE}-cd" -n ${ARGOCD_NAMESPACE}
+	helm uninstall "${ARGOCD_RELEASE}-apps" -n ${ARGOCD_NAMESPACE}
+	helm uninstall "${ARGOCD_RELEASE}-workflows" -n ${ARGOCD_NAMESPACE}
+	helm uninstall "${ARGOCD_RELEASE}-image-updater" -n ${ARGOCD_NAMESPACE}
 	kubectl delete ns ${ARGOCD_NAMESPACE}
