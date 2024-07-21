@@ -3,8 +3,8 @@ kind: ClusterConfig
 
 metadata:
   name: pick
-  region: eu-central-1
-  version: "1.27"
+  region: us-east-2
+  version: "1.29"
 
 iam:
   withOIDC: true
@@ -12,7 +12,7 @@ iam:
 nodeGroups:
   - name: default-nodegroup
     instanceType: t3.medium
-    desiredCapacity: 5
+    desiredCapacity: 3
     privateNetworking: true
 
 addons:

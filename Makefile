@@ -17,7 +17,7 @@ include ${SRCDIR}/app_ingress.makefile
 include ${SRCDIR}/app_redis.makefile
 include ${SRCDIR}/app_mailhog.makefile
 include ${SRCDIR}/monitoring.makefile
-include ${SRCDIR}/argocd.makefile
+#include ${SRCDIR}/argocd.makefile
 
 # GENERAL APPS
 include ${SRCDIR}/app_giropops_senhas.makefile
