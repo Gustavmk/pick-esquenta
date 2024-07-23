@@ -1,0 +1,36 @@
+---
+feature-flags:
+  disable-deletion-protection:
+    RDSInstance: true
+    EC2Instance: true
+    CloudformationStack: true
+  force-delete-lightsail-addons: true
+
+regions:
+- us-east-2
+- global
+
+account-blocklist:
+- "999999999999" # prod
+
+accounts:
+  809349731652: {} # demo
+
+resource-types:
+  # don't nuke IAM users
+  excludes:
+  - IAMUser
+
+presets:
+  terraform:
+    filters:
+      S3Bucket:
+      - type: glob
+        value: "my-statebucket-*"
+      DynamoDBTable:
+      - "terraform-lock"
+  common:
+    filters:
+      IAMRole:
+      - "OrganizationAccountAccessRole"
+
