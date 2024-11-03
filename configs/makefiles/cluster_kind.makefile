@@ -1,10 +1,9 @@
-CLUSTER_NAME := kind
-CLUSTER_CONFIG := configs/kind/cluster.yaml
-EKSCTL_CONFIG := configs/eksctl/config.yaml
-
 ##------------------------------------------------------------------------
 ##                     Local K8S Cluster
 ##------------------------------------------------------------------------
+CLUSTER_NAME := kind
+CLUSTER_CONFIG := configs/kind/cluster.yaml
+
 deploy-kind-cluster:					# Realiza a instalação do cluster local
 	kind get clusters | grep -i ${CLUSTER_NAME} && echo "Cluster já existe" || kind create cluster --wait 120s --name ${CLUSTER_NAME} --config ${CLUSTER_CONFIG}
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
