@@ -12,12 +12,12 @@ deploy-eks-cluster:						# Cria o cluster na AWS
 	# Validade cluster version 
 	# https://docs.aws.amazon.com/eks/latest/userguide/managing-vpc-cni.html
 	eksctl create addon --name vpc-cni --version v1.18.2-eksbuild.1 --cluster pick --force
-	# in AWS eddit addon - enableNetworkPolicy": "true"
+	# in AWS eddit addon - {"enableNetworkPolicy": "true"}
 	eksctl get addon --cluster pick
 
 delete-eks-cluster:						# Remove o cluster na AWS
 	#eksctl get cluster
-	eksctl delete cluster --name=${CLUSTER_NAME}
+	eksctl delete cluster --name=pick
 	
 	# Validate 
 	aws-nuke -c configs/eksctl/cloud-nuke.yml --profile default 
