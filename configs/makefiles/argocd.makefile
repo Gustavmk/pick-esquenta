@@ -46,11 +46,9 @@ deploy-argocd-local:					# Realiza a instalação do Metrics Server no Kind
 		--create-namespace
 
 	echo "define default password"
-	kubectl -n argocd patch secret argocd-secret \
-  		-p '{"stringData": {
-    		"admin.password": "$2a$10$kMlplGzwUoi6.YMg/xC41OD7HOSHgcPHRezFBb6KI.pfnoVgfHNBa",
-    		"admin.passwordMtime": "'$(date +%FT%T%Z)'"
-  		}}'
+	# argocd account bcrypt --password "Password123" 
+	#kubectl -n argocd patch secret argocd-secret -p '{"stringData": { "admin.password": "$2a$10$HZBWZdLWhDWdogT7auxMwed6vVswk2ZU8vF0YNVbyHdcsmJh5eSS2%", "admin.passwordMtime": "'$(date +%FT%T%Z)'" }}'
+	#k get pods -n argocd -l app.kubernetes.io/name=argocd-server	
 
 deploy-argocd-eks:					# Realiza a instalação do Metrics Server no EKS
 	helm repo add argo https://argoproj.github.io/argo-helm
