@@ -1,7 +1,7 @@
 ##------------------------------------------------------------------------
 ##                     Local K8S Cluster
 ##------------------------------------------------------------------------
-CLUSTER_NAME := kind
+CLUSTER_NAME := localk8s
 CLUSTER_CONFIG := configs/kind/cluster.yaml
 
 deploy-kind-cluster:					# Realiza a instalação do cluster local

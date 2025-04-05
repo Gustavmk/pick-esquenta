@@ -40,8 +40,8 @@ deploy-all-local:						# Sobe a infra completa localmente num cluster Kind
 	$(MAKE) deploy-kube-prometheus-stack-local
 	$(MAKE) deploy-redis-local
 	$(MAKE) deploy-metrics-server-local
-	$(MAKE) build-scan-push-local
-	$(MAKE) deploy-giropops-senhas-local
+#	$(MAKE) build-scan-push-local
+#	$(MAKE) deploy-giropops-senhas-local
 
 deploy-infra-local:						# Sobe a infra sem Apps localmente num cluster Kind
 	$(MAKE) deploy-kind-cluster
