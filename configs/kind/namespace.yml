@@ -3,18 +3,18 @@ kind: Namespace
 metadata:
   name: prod
   labels:
-    goldilocks.fairwinds.com/enabled: "true"
+    tls-sync-secret: "true"
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
   name: hom
   labels:
-    goldilocks.fairwinds.com/enabled: "true"
+    tls-sync-secret: "true"
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
   name: dev
   labels:
-    goldilocks.fairwinds.com/enabled: "true"
+    tls-sync-secret: "true"

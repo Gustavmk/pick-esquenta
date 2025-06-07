@@ -12,7 +12,6 @@ hosts=(
     "alertmanager.kubernetes.docker.internal"
     "prometheus.kubernetes.docker.internal"
     "grafana.kubernetes.docker.internal"
-    "goldilocks.kubernetes.docker.internal"
     "mailhog.kubernetes.docker.internal"
     "argocd.kubernetes.docker.internal"
 )

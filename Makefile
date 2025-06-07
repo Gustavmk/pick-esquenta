@@ -50,7 +50,6 @@ deploy-infra-local:						# Sobe a infra sem Apps localmente num cluster Kind
 	$(MAKE) deploy-grafana-loki-local
 	$(MAKE) deploy-metrics-server-local
 	$(MAKE) deploy-email-local
-	$(MAKE) deploy-goldilocks-local
 	$(MAKE) deploy-blackbox-local
 
 deploy-infra-aws:						# Sobe a infra completa na AWS

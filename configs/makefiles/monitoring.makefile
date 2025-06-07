@@ -16,12 +16,6 @@ PROMTAIL_NAMESPACE := monitoring
 PROMTAIL_CHART_VALUES := configs/helm/promtail/values.yml
 PROMTAIL_CHART_LOCAL_VALUES := configs/helm/promtail/values-kind.yml
 
-GOLDILOCKS_RELEASE := goldilocks
-GOLDILOCKS_NAMESPACE := management
-GOLDILOCKS_CHART_VALUES := configs/helm/goldilocks/values.yml
-GOLDILOCKS_LOCAL_VALUES := configs/helm/goldilocks/values-local.yml
-GOLDILOCKS_AKS_VALUESS := configs/helm/goldilocks/values-aks.yml
-
 BLACKBOX_RELEASE := blackbox
 BLACKBOX_NAMESPACE := monitoring
 BLACKBOX_ROOT := configs/helm/blackbox-exporter
@@ -99,36 +93,6 @@ deploy-blackbox-local:
 	kubectl apply -f ${BLACKBOX_ROOT}/service-monitor.yml -n ${BLACKBOX_NAMESPACE}
 
 
-##------------------------------------------------------------------------
-##                    Comandos do Goldilocks
-##------------------------------------------------------------------------
-# https://github.com/FairwindsOps/charts/tree/master/stable/goldilocks
-deploy-goldilocks-local:					# Realiza a instalação do Metrics Server no Kind
-		helm repo add fairwinds-stable https://charts.fairwinds.com/stable
-		helm upgrade -i ${GOLDILOCKS_RELEASE} -n ${GOLDILOCKS_NAMESPACE} fairwinds-stable/goldilocks \
-		--values ${GOLDILOCKS_CHART_VALUES} \
-		--values ${GOLDILOCKS_LOCAL_VALUES} \
-		--wait \
-		--atomic \
-		--debug \
-		--timeout 3m \
-		--create-namespace
-
-
-deploy-goldilocks-aks:					# Realiza a instalação do Metrics Server no Kind
-		helm repo add fairwinds-stable https://charts.fairwinds.com/stable
-		helm upgrade -i ${GOLDILOCKS_RELEASE} -n ${GOLDILOCKS_NAMESPACE} fairwinds-stable/goldilocks \
-		--values ${GOLDILOCKS_CHART_VALUES} \
-		--values ${GOLDILOCKS_AKS_VALUES} \
-		--wait \
-		--atomic \
-		--debug \
-		--timeout 3m \
-		--create-namespace
-
-delete-goldilocks:					# Remove a instalação do Metrics Server no EKS
-	helm uninstall ${GOLDILOCKS_RELEASE} -n ${GOLDILOCKS_NAMESPACE}
-	kubectl delete ns ${GOLDILOCKS_NAMESPACE}
 
 ##------------------------------------------------------------------------
 ##                     Comandos do Prometheus
