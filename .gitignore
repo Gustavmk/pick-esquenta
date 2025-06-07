@@ -4,3 +4,6 @@
 # certificates
 *.crt
 *.key
+
+# Secrets
+kubeconfig.yaml
