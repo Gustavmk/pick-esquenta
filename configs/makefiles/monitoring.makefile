@@ -107,7 +107,7 @@ deploy-kube-prometheus-stack-local:		# Realiza a instalação do Prometheus loca
 		--wait \
 		--atomic \
 		--debug \
-		--timeout 3m \
+		--timeout 5m \
 		--create-namespace
 
 deploy-kube-prometheus-stack-alertmanager-config-local:		# Realiza a configuração do AlertManager localmente para testes de alertas

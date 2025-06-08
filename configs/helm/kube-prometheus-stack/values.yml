@@ -1,5 +1,45 @@
+global:
+  rbac:
+    create: true
+    
 defaultRules:
   create: false
+
+kubeControllerManager:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+kubeStateMetrics:
+  enabled: true
+
+kube-state-metrics:
+  image:
+    pullPolicy: IfNotPresent
+  resources: 
+    limits:
+     memory: 64Mi
+    requests:
+     cpu: 10m
+     memory: 32Mi
+
+nodeExporter:
+  operatingSystems:
+    darwin:
+      enabled: false
+
+prometheus-node-exporter:
+  image:
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+     memory: 64Mi
+    requests:
+     cpu: 10m
+     memory: 32Mi
 
 alertmanager:
   service:
@@ -38,46 +78,6 @@ grafana:
         url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/grafana/dashboards/nginx.json
       nginx-ingress-handling-performance:
         url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/grafana/dashboards/request-handling-performance.json
-
-kubeControllerManager:
-  enabled: false
-
-kubeEtcd:
-  enabled: false
-
-kubeScheduler:
-  enabled: false
-
-kubeProxy:
-  enabled: false
-
-kubeStateMetrics:
-  enabled: true
-
-kube-state-metrics:
-  image:
-    pullPolicy: IfNotPresent
-  resources: 
-    limits:
-     memory: 64Mi
-    requests:
-     cpu: 10m
-     memory: 32Mi
-
-nodeExporter:
-  operatingSystems:
-    darwin:
-      enabled: false
-
-prometheus-node-exporter:
-  image:
-    pullPolicy: IfNotPresent
-  resources:
-    limits:
-     memory: 64Mi
-    requests:
-     cpu: 10m
-     memory: 32Mi
 
 prometheusOperator:
   resources:
